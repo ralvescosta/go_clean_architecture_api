@@ -1,5 +1,6 @@
-package signin_bussiness_entities
+package signinbussinessentities
 
+// RegisterUsersEntity ...
 type RegisterUsersEntity struct {
 	Name     string `json:"name"`
 	LastName string `json:"lastName"`

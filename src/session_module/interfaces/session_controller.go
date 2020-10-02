@@ -1,13 +1,14 @@
-package session_interfaces
+package sessioninterfaces
 
 import (
 	"encoding/json"
+	"net/http"
+
 	usecases "gomux_gorm/src/session_module/application/usecases"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
-
-	"net/http"
 )
 
+// ISessionController ...
 type ISessionController interface {
 	Handle(res http.ResponseWriter, req *http.Request)
 }
@@ -16,6 +17,7 @@ type controller struct {
 	usecase *usecases.ISessionUsecase
 }
 
+// Handle ...
 func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 
 	var body bussiness.UsersInput
@@ -45,6 +47,7 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(res).Encode(user)
 }
 
+// SessionController ...
 func SessionController(usecase *usecases.ISessionUsecase) ISessionController {
 	return &controller{usecase}
 }

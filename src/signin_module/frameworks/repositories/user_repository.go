@@ -1,21 +1,23 @@
-package signin_frameworks_repositories
+package signinframeworksrepositories
 
 import (
+	"github.com/jinzhu/gorm"
+
 	migrations "gomux_gorm/src/core/database/table_models"
 	entities "gomux_gorm/src/signin_module/bussiness/entities"
-
-	"github.com/jinzhu/gorm"
 )
 
 type userRepository struct {
 	db *gorm.DB
 }
 
+// IUserRepository ...
 type IUserRepository interface {
 	Create(registerUser *entities.RegisterUsersEntity)
 	FindByEmail(email string) *migrations.Users
 }
 
+// Create ...
 func (r *userRepository) Create(registerUser *entities.RegisterUsersEntity) {
 
 	r.db.Create(&migrations.Users{
@@ -26,6 +28,7 @@ func (r *userRepository) Create(registerUser *entities.RegisterUsersEntity) {
 	})
 }
 
+// FindOne ...
 func (r *userRepository) FindOne(id int) *migrations.Users {
 	user := migrations.Users{}
 
@@ -34,6 +37,7 @@ func (r *userRepository) FindOne(id int) *migrations.Users {
 	return &user
 }
 
+// FindByEmail ...
 func (r *userRepository) FindByEmail(email string) *migrations.Users {
 	user := migrations.Users{}
 
@@ -42,6 +46,7 @@ func (r *userRepository) FindByEmail(email string) *migrations.Users {
 	return &user
 }
 
+// FindAll ...
 func (r *userRepository) FindAll() *[]migrations.Users {
 
 	user := []migrations.Users{migrations.Users{}}
@@ -51,18 +56,21 @@ func (r *userRepository) FindAll() *[]migrations.Users {
 	return &user
 }
 
+// Update ...
 func (r *userRepository) Update(id int) *migrations.Users {
 	user := migrations.Users{}
 
 	return &user
 }
 
+// Delete ...
 func (r *userRepository) Delete(id int) *migrations.Users {
 	user := migrations.Users{}
 
 	return &user
 }
 
+// UserRepositoryConstructor ...
 func UserRepositoryConstructor(db *gorm.DB) IUserRepository {
 	return &userRepository{db}
 }

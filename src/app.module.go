@@ -3,28 +3,37 @@ package main
 import (
 	"fmt"
 	"log"
-
-	core "gomux_gorm/src/core/database"
-	signinUsecases "gomux_gorm/src/signin_module/application/usecases"
-	signinCrypto "gomux_gorm/src/signin_module/frameworks/crypto"
-	signinRepositories "gomux_gorm/src/signin_module/frameworks/repositories"
-	signinControllers "gomux_gorm/src/signin_module/interfaces"
 	"net/http"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+
+	core "gomux_gorm/src/core/database"
+
+	signinUsecases "gomux_gorm/src/signin_module/application/usecases"
+	signinCrypto "gomux_gorm/src/signin_module/frameworks/crypto"
+	signinRepositories "gomux_gorm/src/signin_module/frameworks/repositories"
+	signinControllers "gomux_gorm/src/signin_module/interfaces"
+
+	sessionUsecases "gomux_gorm/src/session_module/application/usecases"
+	sessionCrypto "gomux_gorm/src/session_module/frameworks/crypto"
+	sessionRepositories "gomux_gorm/src/session_module/frameworks/repositories"
+	sessionToken "gomux_gorm/src/session_module/frameworks/token"
+	sessionControllers "gomux_gorm/src/session_module/interfaces"
 )
 
 type module struct {
 	conn *gorm.DB
 }
 
+// IHttpServer ...
 type IHttpServer interface {
-	StartHttpServer()
+	StartHTTPServer()
 }
 
-func (m *module) StartHttpServer() {
+// StartHTTPServer ...
+func (m *module) StartHTTPServer() {
 	const PORT string = ":4000"
 
 	conn := core.ConnectToDatabase()
@@ -53,6 +62,12 @@ func (m *module) registerRouters(router *mux.Router) {
 	_signinController := signinControllers.SigninController(&_signinUsecase)
 	router.HandleFunc("/signin", _signinController.Handle).Methods("POST")
 
+	_sessionCrypto := sessionCrypto.HashConstructor()
+	_sessionToken := sessionToken.TokenConstructor()
+	_sessionRepository := sessionRepositories.UserRepositoryConstructor(m.conn)
+	_sessionUsecase := sessionUsecases.SessionUsecaseConstructor(&_sessionRepository, &_sessionCrypto, &_sessionToken)
+	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
+	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
 }
 
 func headersMiddleware(next http.Handler) http.Handler {
@@ -76,6 +91,7 @@ func headersMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func HttpServerController() IHttpServer {
+// HTTPServerController ...
+func HTTPServerController() IHttpServer {
 	return &module{}
 }

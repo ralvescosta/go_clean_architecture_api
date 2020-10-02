@@ -1,17 +1,20 @@
-package session_bussiness_entities
+package sessionbussinessentities
 
 import (
 	"time"
 )
 
+// UsersInput ...
 type UsersInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type UsersEntity struct {
-	Name     string    `json:"name"`
-	LastName string    `json:"lastName"`
-	Email    string    `json:"email"`
-	CreateAt time.Time `json:"createAt"`
+// SessionEntity ...
+type SessionEntity struct {
+	Name        string    `json:"name"`
+	LastName    string    `json:"lastName"`
+	Email       string    `json:"email"`
+	AccessToken string    `json:"accessToken"`
+	CreateAt    time.Time `json:"createAt"`
 }

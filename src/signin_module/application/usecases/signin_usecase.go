@@ -1,7 +1,8 @@
-package signin_application_usecases
+package signinapplicationusecases
 
 import (
 	"errors"
+
 	bussiness "gomux_gorm/src/signin_module/bussiness/entities"
 	crypto "gomux_gorm/src/signin_module/frameworks/crypto"
 	repositories "gomux_gorm/src/signin_module/frameworks/repositories"
@@ -12,10 +13,12 @@ type usecase struct {
 	crypto     *crypto.IHasher
 }
 
+// ISigninUsecase ...
 type ISigninUsecase interface {
 	SigninUsecase(user *bussiness.RegisterUsersEntity) error
 }
 
+// SigninUsecase ...
 func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 
 	userAlreadyRegistered := (*u.repository).FindByEmail(user.Email)
@@ -36,6 +39,7 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 	return nil
 }
 
+// SigninUsecaseConstructor ...
 func SigninUsecaseConstructor(repository *repositories.IUserRepository, crypto *crypto.IHasher) ISigninUsecase {
 	return &usecase{repository, crypto}
 }

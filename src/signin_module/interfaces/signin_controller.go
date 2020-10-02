@@ -1,13 +1,14 @@
-package signin_interfaces
+package signininterfaces
 
 import (
 	"encoding/json"
+	"net/http"
+
 	usecases "gomux_gorm/src/signin_module/application/usecases"
 	bussiness "gomux_gorm/src/signin_module/bussiness/entities"
-
-	"net/http"
 )
 
+// ISigninController ...
 type ISigninController interface {
 	Handle(res http.ResponseWriter, req *http.Request)
 }
@@ -16,6 +17,7 @@ type controller struct {
 	usecase *usecases.ISigninUsecase
 }
 
+// Handle ...
 func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 
 	var body bussiness.RegisterUsersEntity
@@ -46,6 +48,7 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 	res.Write([]byte(`{}`))
 }
 
+// SigninController ...
 func SigninController(usecase *usecases.ISigninUsecase) ISigninController {
 	return &controller{usecase}
 }

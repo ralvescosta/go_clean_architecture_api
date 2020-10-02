@@ -1,22 +1,27 @@
-package session_application_usecases
+package sessionapplicationusecases
 
 import (
 	"errors"
+
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 	crypto "gomux_gorm/src/session_module/frameworks/crypto"
 	repositories "gomux_gorm/src/session_module/frameworks/repositories"
+	token "gomux_gorm/src/session_module/frameworks/token"
 )
 
 type usecase struct {
 	repository *repositories.IUserRepository
 	crypto     *crypto.IHasher
+	token      *token.IToken
 }
 
+// ISessionUsecase ...
 type ISessionUsecase interface {
-	SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.UsersEntity, error)
+	SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.SessionEntity, error)
 }
 
-func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.UsersEntity, error) {
+// SessionUsecase ...
+func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.SessionEntity, error) {
 
 	user := (*u.repository).FindByEmail(userInput.Email)
 
@@ -30,14 +35,22 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.Us
 		return nil, errors.New("Wrong Credentials")
 	}
 
-	return &bussiness.UsersEntity{
-		Name:     user.Name,
-		LastName: user.LastName,
-		Email:    user.Email,
-		CreateAt: user.CreatedAt,
+	token, err := (*u.token).CreateToken(user.ID)
+
+	if err != nil {
+		return nil, errors.New("JWT Error")
+	}
+
+	return &bussiness.SessionEntity{
+		Name:        user.Name,
+		LastName:    user.LastName,
+		Email:       user.Email,
+		AccessToken: token,
+		CreateAt:    user.CreatedAt,
 	}, nil
 }
 
-func SessionUsecaseConstructor(repository *repositories.IUserRepository, crypto *crypto.IHasher) ISessionUsecase {
-	return &usecase{repository, crypto}
+// SessionUsecaseConstructor ...
+func SessionUsecaseConstructor(repository *repositories.IUserRepository, crypto *crypto.IHasher, token *token.IToken) ISessionUsecase {
+	return &usecase{repository, crypto, token}
 }
