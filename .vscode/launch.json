@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "host": "127.0.0.1",
+      "port": 2345,
+      "remotePath": "",
+      "program": "${workspaceFolder}/src/*.go",
+      "env": {},
+      "args": [],
+      "showLog": true
+    }
+  ]
+}
