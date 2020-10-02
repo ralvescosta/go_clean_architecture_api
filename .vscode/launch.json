@@ -7,11 +7,9 @@
       "request": "launch",
       "mode": "auto",
       "host": "127.0.0.1",
-      "port": 2345,
-      "remotePath": "",
-      "program": "${workspaceFolder}/src/*.go",
+      "program": "${workspaceFolder}/src",
       "env": {},
-      "args": [],
+      "args": ["run", "main.go"],
       "showLog": true
     }
   ]
