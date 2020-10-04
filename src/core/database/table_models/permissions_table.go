@@ -1,6 +1,10 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Permissions ...
 type Permissions struct {
@@ -9,4 +13,5 @@ type Permissions struct {
 	Description string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt
 }

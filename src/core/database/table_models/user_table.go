@@ -1,6 +1,10 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Users ...
 type Users struct {
@@ -11,4 +15,5 @@ type Users struct {
 	Password  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt
 }

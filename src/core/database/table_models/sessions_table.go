@@ -1,6 +1,10 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Sessions ...
 type Sessions struct {
@@ -20,4 +24,5 @@ type Sessions struct {
 	AccessToken   string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+	DeletedAt     gorm.DeletedAt
 }
