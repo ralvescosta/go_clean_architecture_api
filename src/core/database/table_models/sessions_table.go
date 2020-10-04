@@ -8,7 +8,7 @@ import (
 
 // Sessions ...
 type Sessions struct {
-	ID int64
+	ID int64 `gorm:"primaryKey"`
 
 	UserID    int64
 	UserName  string

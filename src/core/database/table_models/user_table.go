@@ -8,7 +8,7 @@ import (
 
 // Users ...
 type Users struct {
-	ID        int64
+	ID        int64 `gorm:"primaryKey"`
 	Name      string
 	LastName  string
 	Email     string

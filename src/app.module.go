@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -46,8 +47,15 @@ func (m *module) StartHTTPServer() {
 
 	m.registerRouters(router)
 
+	srv := &http.Server{
+		Handler:      handlers.CompressHandler(router),
+		Addr:         "127.0.0.1" + PORT,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
 	log.Println("Server Listening on port: ", PORT)
-	log.Fatalln(http.ListenAndServe(PORT, handlers.CompressHandler(router)))
+	log.Fatalln(srv.ListenAndServe())
 }
 
 func (m *module) registerRouters(router *mux.Router) {
