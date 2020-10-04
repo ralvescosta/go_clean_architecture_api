@@ -57,8 +57,9 @@ func (m *module) registerRouters(router *mux.Router) {
 	})
 
 	_signinCrypto := signinCrypto.HashConstructor()
-	_signinRepository := signinRepositories.UserRepositoryConstructor(m.conn)
-	_signinUsecase := signinUsecases.SigninUsecaseConstructor(&_signinRepository, &_signinCrypto)
+	_signinUserRepository := signinRepositories.UserRepositoryConstructor(m.conn)
+	_signinUsersPermissionsRepository := signinRepositories.UsersPermissionsRepositoryConstructor(m.conn)
+	_signinUsecase := signinUsecases.SigninUsecaseConstructor(&_signinUserRepository, &_signinUsersPermissionsRepository, &_signinCrypto)
 	_signinController := signinControllers.SigninController(&_signinUsecase)
 	router.HandleFunc("/signin", _signinController.Handle).Methods("POST")
 

@@ -5,9 +5,10 @@ import (
 	"log"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/postgres" //
 )
 
+// ConnectToDatabase ...
 func ConnectToDatabase() *gorm.DB {
 	connection, err := gorm.Open("postgres", "user=postgres password=12345 dbname=default sslmode=disable")
 
@@ -15,7 +16,7 @@ func ConnectToDatabase() *gorm.DB {
 		log.Fatal(err)
 	}
 
-	connection.AutoMigrate(&migrations.Users{}, &migrations.Permissions{}, &migrations.UserPermissions{}, &migrations.Sessions{})
+	connection.AutoMigrate(&migrations.Users{}, &migrations.Permissions{}, &migrations.UsersPermissions{}, &migrations.Sessions{})
 
 	database := connection.DB()
 	err = database.Ping()

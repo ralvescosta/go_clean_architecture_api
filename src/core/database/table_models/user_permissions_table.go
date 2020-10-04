@@ -2,7 +2,8 @@ package core
 
 import "time"
 
-type UserPermissions struct {
+// UsersPermissions ...
+type UsersPermissions struct {
 	ID int64
 
 	UserID    int64

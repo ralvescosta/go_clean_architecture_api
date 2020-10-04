@@ -2,6 +2,7 @@ package core
 
 import "time"
 
+// Users ...
 type Users struct {
 	ID        int64
 	Name      string

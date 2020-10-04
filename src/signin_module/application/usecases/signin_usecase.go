@@ -9,8 +9,9 @@ import (
 )
 
 type usecase struct {
-	repository *repositories.IUserRepository
-	crypto     *crypto.IHasher
+	userRepository             *repositories.IUserRepository
+	usersPermissionsRepository *repositories.IUsersPermissionsRepository
+	crypto                     *crypto.IHasher
 }
 
 // ISigninUsecase ...
@@ -21,7 +22,7 @@ type ISigninUsecase interface {
 // SigninUsecase ...
 func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 
-	userAlreadyRegistered := (*u.repository).FindByEmail(user.Email)
+	userAlreadyRegistered := (*u.userRepository).FindByEmail(user.Email)
 
 	if userAlreadyRegistered.ID != 0 {
 		return errors.New("user already exist")
@@ -34,12 +35,13 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 	}
 	user.Password = hashPassword
 
-	(*u.repository).Create(user)
+	createdUser := (*u.userRepository).Create(user)
+	(*u.usersPermissionsRepository).Create(createdUser, bussiness.RoleUser, bussiness.Permissions[bussiness.RoleUser])
 
 	return nil
 }
 
 // SigninUsecaseConstructor ...
-func SigninUsecaseConstructor(repository *repositories.IUserRepository, crypto *crypto.IHasher) ISigninUsecase {
-	return &usecase{repository, crypto}
+func SigninUsecaseConstructor(userRepository *repositories.IUserRepository, usersPermissionsRepository *repositories.IUsersPermissionsRepository, crypto *crypto.IHasher) ISigninUsecase {
+	return &usecase{userRepository, usersPermissionsRepository, crypto}
 }

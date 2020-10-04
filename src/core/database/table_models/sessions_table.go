@@ -2,6 +2,7 @@ package core
 
 import "time"
 
+// Sessions ...
 type Sessions struct {
 	ID int64
 

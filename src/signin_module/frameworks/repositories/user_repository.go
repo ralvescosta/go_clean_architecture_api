@@ -13,19 +13,23 @@ type userRepository struct {
 
 // IUserRepository ...
 type IUserRepository interface {
-	Create(registerUser *entities.RegisterUsersEntity)
+	Create(registerUser *entities.RegisterUsersEntity) *migrations.Users
 	FindByEmail(email string) *migrations.Users
 }
 
 // Create ...
-func (r *userRepository) Create(registerUser *entities.RegisterUsersEntity) {
+func (r *userRepository) Create(registerUser *entities.RegisterUsersEntity) *migrations.Users {
 
-	r.db.Create(&migrations.Users{
+	user := migrations.Users{
 		Name:     registerUser.Name,
 		LastName: registerUser.LastName,
 		Email:    registerUser.Email,
 		Password: registerUser.Password,
-	})
+	}
+
+	r.db.Create(&user)
+
+	return &user
 }
 
 // FindOne ...
