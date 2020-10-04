@@ -3,6 +3,7 @@ package sessioninterfaces
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	usecases "gomux_gorm/src/session_module/application/usecases"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
@@ -35,7 +36,15 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := (*c.usecase).SessionUsecase(&body)
+	host := strings.Split(req.Host, ":")
+	session := bussiness.SessionEntity{
+		Agent:         req.Header["User-Agent"][0],
+		RemoteAddress: req.RemoteAddr,
+		LocalAddress:  host[0],
+		LocalPort:     host[1],
+	}
+
+	user, err := (*c.usecase).SessionUsecase(&body, &session)
 
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)

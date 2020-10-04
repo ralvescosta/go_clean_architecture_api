@@ -64,8 +64,9 @@ func (m *module) registerRouters(router *mux.Router) {
 
 	_sessionCrypto := sessionCrypto.HashConstructor()
 	_sessionToken := sessionToken.TokenConstructor()
-	_sessionRepository := sessionRepositories.UserRepositoryConstructor(m.conn)
-	_sessionUsecase := sessionUsecases.SessionUsecaseConstructor(&_sessionRepository, &_sessionCrypto, &_sessionToken)
+	_sessionUserRepository := sessionRepositories.UserRepositoryConstructor(m.conn)
+	_sessionSessionRepository := sessionRepositories.SessionRepositoryConstructor(m.conn)
+	_sessionUsecase := sessionUsecases.SessionUsecaseConstructor(&_sessionUserRepository, &_sessionSessionRepository, &_sessionCrypto, &_sessionToken)
 	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
 	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
 }

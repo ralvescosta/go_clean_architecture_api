@@ -10,8 +10,8 @@ type UsersInput struct {
 	Password string `json:"password"`
 }
 
-// SessionEntity ...
-type SessionEntity struct {
+// UserSessionEntity ...
+type UserSessionEntity struct {
 	Name        string    `json:"name"`
 	LastName    string    `json:"lastName"`
 	Email       string    `json:"email"`

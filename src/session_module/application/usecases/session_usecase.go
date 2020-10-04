@@ -10,20 +10,20 @@ import (
 )
 
 type usecase struct {
-	repository *repositories.IUserRepository
-	crypto     *crypto.IHasher
-	token      *token.IToken
+	userRepository    *repositories.IUserRepository
+	sessionRepository *repositories.ISessionRepository
+	crypto            *crypto.IHasher
+	token             *token.IToken
 }
 
 // ISessionUsecase ...
 type ISessionUsecase interface {
-	SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.SessionEntity, error)
+	SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error)
 }
 
 // SessionUsecase ...
-func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.SessionEntity, error) {
-
-	user := (*u.repository).FindByEmail(userInput.Email)
+func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error) {
+	user := (*u.userRepository).FindByEmail(userInput.Email)
 
 	if user.ID == 0 {
 		return nil, errors.New("user do not exist")
@@ -36,12 +36,15 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.Se
 	}
 
 	token, err := (*u.token).CreateToken(user.ID)
+	session.AccessToken = token
+
+	(*u.sessionRepository).Create(session, user)
 
 	if err != nil {
 		return nil, errors.New("JWT Error")
 	}
 
-	return &bussiness.SessionEntity{
+	return &bussiness.UserSessionEntity{
 		Name:        user.Name,
 		LastName:    user.LastName,
 		Email:       user.Email,
@@ -51,6 +54,10 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput) (*bussiness.Se
 }
 
 // SessionUsecaseConstructor ...
-func SessionUsecaseConstructor(repository *repositories.IUserRepository, crypto *crypto.IHasher, token *token.IToken) ISessionUsecase {
-	return &usecase{repository, crypto, token}
+func SessionUsecaseConstructor(
+	userRepository *repositories.IUserRepository,
+	sessionRepository *repositories.ISessionRepository,
+	crypto *crypto.IHasher, token *token.IToken,
+) ISessionUsecase {
+	return &usecase{userRepository, sessionRepository, crypto, token}
 }
