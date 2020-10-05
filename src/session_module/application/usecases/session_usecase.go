@@ -2,6 +2,7 @@ package sessionapplicationusecases
 
 import (
 	"errors"
+	"fmt"
 
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 	crypto "gomux_gorm/src/session_module/frameworks/crypto"
@@ -10,10 +11,11 @@ import (
 )
 
 type usecase struct {
-	userRepository    *repositories.IUserRepository
-	sessionRepository *repositories.ISessionRepository
-	crypto            *crypto.IHasher
-	token             *token.IToken
+	userRepository             *repositories.IUserRepository
+	sessionRepository          *repositories.ISessionRepository
+	usersPermissionsRepository *repositories.IUsersPermissionsRepository
+	crypto                     *crypto.IHasher
+	token                      *token.IToken
 }
 
 // ISessionUsecase ...
@@ -34,6 +36,9 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 	if !check {
 		return nil, errors.New("Wrong Credentials")
 	}
+
+	userPermission := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
+	fmt.Println(userPermission)
 
 	token, err := (*u.token).CreateToken(user.ID)
 	session.AccessToken = token
@@ -57,7 +62,8 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 func SessionUsecaseConstructor(
 	userRepository *repositories.IUserRepository,
 	sessionRepository *repositories.ISessionRepository,
+	usersPermissionsRepository *repositories.IUsersPermissionsRepository,
 	crypto *crypto.IHasher, token *token.IToken,
 ) ISessionUsecase {
-	return &usecase{userRepository, sessionRepository, crypto, token}
+	return &usecase{userRepository, sessionRepository, usersPermissionsRepository, crypto, token}
 }

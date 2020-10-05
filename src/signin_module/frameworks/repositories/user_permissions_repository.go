@@ -3,7 +3,7 @@ package signinframeworksrepositories
 import (
 	"github.com/jinzhu/gorm"
 
-	migrations "gomux_gorm/src/core/database/table_models"
+	tables "gomux_gorm/src/core/database/table_models"
 )
 
 type usersPermissionsRepository struct {
@@ -12,12 +12,12 @@ type usersPermissionsRepository struct {
 
 // IUsersPermissionsRepository ...
 type IUsersPermissionsRepository interface {
-	Create(user *migrations.Users, permissionID int64, permission string) *migrations.UsersPermissions
+	Create(user *tables.Users, permissionID int64, permission string) *tables.UsersPermissions
 }
 
-func (r *usersPermissionsRepository) Create(user *migrations.Users, permissionID int64, permission string) *migrations.UsersPermissions {
+func (r *usersPermissionsRepository) Create(user *tables.Users, permissionID int64, permission string) *tables.UsersPermissions {
 
-	userPermission := migrations.UsersPermissions{
+	userPermission := tables.UsersPermissions{
 		PermissionID:   permissionID,
 		PermissionRole: permission,
 		UserID:         user.ID,

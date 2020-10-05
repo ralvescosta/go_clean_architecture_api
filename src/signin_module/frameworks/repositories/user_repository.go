@@ -3,7 +3,7 @@ package signinframeworksrepositories
 import (
 	"github.com/jinzhu/gorm"
 
-	migrations "gomux_gorm/src/core/database/table_models"
+	tables "gomux_gorm/src/core/database/table_models"
 	entities "gomux_gorm/src/signin_module/bussiness/entities"
 )
 
@@ -13,14 +13,14 @@ type userRepository struct {
 
 // IUserRepository ...
 type IUserRepository interface {
-	Create(registerUser *entities.RegisterUsersEntity) *migrations.Users
-	FindByEmail(email string) *migrations.Users
+	Create(registerUser *entities.RegisterUsersEntity) *tables.Users
+	FindByEmail(email string) *tables.Users
 }
 
 // Create ...
-func (r *userRepository) Create(registerUser *entities.RegisterUsersEntity) *migrations.Users {
+func (r *userRepository) Create(registerUser *entities.RegisterUsersEntity) *tables.Users {
 
-	user := migrations.Users{
+	user := tables.Users{
 		Name:     registerUser.Name,
 		LastName: registerUser.LastName,
 		Email:    registerUser.Email,
@@ -33,8 +33,8 @@ func (r *userRepository) Create(registerUser *entities.RegisterUsersEntity) *mig
 }
 
 // FindOne ...
-func (r *userRepository) FindOne(id int) *migrations.Users {
-	user := migrations.Users{}
+func (r *userRepository) FindOne(id int) *tables.Users {
+	user := tables.Users{}
 
 	r.db.First(&user, id)
 
@@ -42,8 +42,8 @@ func (r *userRepository) FindOne(id int) *migrations.Users {
 }
 
 // FindByEmail ...
-func (r *userRepository) FindByEmail(email string) *migrations.Users {
-	user := migrations.Users{}
+func (r *userRepository) FindByEmail(email string) *tables.Users {
+	user := tables.Users{}
 
 	r.db.First(&user, "email =?", email)
 
@@ -51,9 +51,9 @@ func (r *userRepository) FindByEmail(email string) *migrations.Users {
 }
 
 // FindAll ...
-func (r *userRepository) FindAll() *[]migrations.Users {
+func (r *userRepository) FindAll() *[]tables.Users {
 
-	user := []migrations.Users{migrations.Users{}}
+	user := []tables.Users{tables.Users{}}
 
 	r.db.Find(&user)
 
@@ -61,15 +61,15 @@ func (r *userRepository) FindAll() *[]migrations.Users {
 }
 
 // Update ...
-func (r *userRepository) Update(id int) *migrations.Users {
-	user := migrations.Users{}
+func (r *userRepository) Update(id int) *tables.Users {
+	user := tables.Users{}
 
 	return &user
 }
 
 // Delete ...
-func (r *userRepository) Delete(id int) *migrations.Users {
-	user := migrations.Users{}
+func (r *userRepository) Delete(id int) *tables.Users {
+	user := tables.Users{}
 
 	return &user
 }

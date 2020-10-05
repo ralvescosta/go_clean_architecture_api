@@ -1,7 +1,7 @@
 package core
 
 import (
-	migrations "gomux_gorm/src/core/database/table_models"
+	tables "gomux_gorm/src/core/database/table_models"
 	"log"
 
 	"github.com/jinzhu/gorm"
@@ -16,7 +16,7 @@ func ConnectToDatabase() *gorm.DB {
 		log.Fatal(err)
 	}
 
-	connection.AutoMigrate(&migrations.Users{}, &migrations.Permissions{}, &migrations.UsersPermissions{}, &migrations.Sessions{})
+	connection.AutoMigrate(&tables.Users{}, &tables.Permissions{}, &tables.UsersPermissions{}, &tables.Sessions{})
 
 	database := connection.DB()
 	err = database.Ping()

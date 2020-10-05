@@ -3,7 +3,7 @@ package sessionframeworksrepositories
 import (
 	"github.com/jinzhu/gorm"
 
-	migrations "gomux_gorm/src/core/database/table_models"
+	tables "gomux_gorm/src/core/database/table_models"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 )
 
@@ -13,11 +13,11 @@ type sessionRepository struct {
 
 // ISessionRepository ...
 type ISessionRepository interface {
-	Create(session *bussiness.SessionEntity, user *migrations.Users)
+	Create(session *bussiness.SessionEntity, user *tables.Users)
 }
 
-func (r *sessionRepository) Create(session *bussiness.SessionEntity, user *migrations.Users) {
-	r.db.Create(&migrations.Sessions{
+func (r *sessionRepository) Create(session *bussiness.SessionEntity, user *tables.Users) {
+	r.db.Create(&tables.Sessions{
 		UserID:         user.ID,
 		UserName:       user.Name,
 		UserEmail:      user.Email,

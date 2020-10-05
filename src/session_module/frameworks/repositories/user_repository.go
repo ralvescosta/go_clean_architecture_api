@@ -3,7 +3,7 @@ package sessionframeworksrepositories
 import (
 	"github.com/jinzhu/gorm"
 
-	migrations "gomux_gorm/src/core/database/table_models"
+	tables "gomux_gorm/src/core/database/table_models"
 )
 
 type userRepository struct {
@@ -12,11 +12,11 @@ type userRepository struct {
 
 // IUserRepository ...
 type IUserRepository interface {
-	FindByEmail(email string) *migrations.Users
+	FindByEmail(email string) *tables.Users
 }
 
-func (r *userRepository) FindByEmail(email string) *migrations.Users {
-	user := migrations.Users{}
+func (r *userRepository) FindByEmail(email string) *tables.Users {
+	user := tables.Users{}
 
 	r.db.First(&user, "email =?", email)
 
