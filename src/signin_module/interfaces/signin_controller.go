@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	core "gomux_gorm/src/core/errors"
+	core "gomux_gorm/src/core/http_response"
 	usecases "gomux_gorm/src/signin_module/application/usecases"
 	bussiness "gomux_gorm/src/signin_module/bussiness/entities"
 )
@@ -66,7 +66,6 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 	}
 
 	res.WriteHeader(http.StatusCreated)
-	// json.NewEncoder(res).Encode("{}")
 	res.Write([]byte(`{}`))
 }
 

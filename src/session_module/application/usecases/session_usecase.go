@@ -1,7 +1,7 @@
 package sessionapplicationusecases
 
 import (
-	core "gomux_gorm/src/core/errors"
+	http "gomux_gorm/src/core/http_response"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 	crypto "gomux_gorm/src/session_module/frameworks/crypto"
 	repositories "gomux_gorm/src/session_module/frameworks/repositories"
@@ -25,19 +25,19 @@ type ISessionUsecase interface {
 func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error) {
 	user := (*u.userRepository).FindByEmail(userInput.Email)
 	if user.ID == 0 {
-		return nil, &core.NotFoundError{}
+		return nil, &http.NotFoundError{}
 	}
 
 	check := (*u.crypto).CheckPasswordHash(userInput.Password, user.Password)
 	if !check {
-		return nil, &core.UnauthorizedError{}
+		return nil, &http.UnauthorizedError{}
 	}
 
 	userPermissions := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
 	var err error = nil
 	for _, element := range *userPermissions {
 		if element.PermissionID == 0 || element.PermissionID == 1 {
-			err = &core.ForbiddenError{}
+			err = &http.ForbiddenError{}
 			break
 		}
 	}
@@ -48,7 +48,7 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 
 	token, err := (*u.token).CreateToken(user.ID)
 	if err != nil {
-		return nil, &core.InternalServerError{}
+		return nil, &http.InternalServerError{}
 	}
 	session.AccessToken = token
 

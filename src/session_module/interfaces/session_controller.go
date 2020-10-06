@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	core "gomux_gorm/src/core/errors"
+	core "gomux_gorm/src/core/http_response"
 	usecases "gomux_gorm/src/session_module/application/usecases"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 )

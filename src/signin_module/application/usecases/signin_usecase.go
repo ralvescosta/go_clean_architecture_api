@@ -1,7 +1,7 @@
 package signinapplicationusecases
 
 import (
-	core "gomux_gorm/src/core/errors"
+	http "gomux_gorm/src/core/http_response"
 	bussiness "gomux_gorm/src/signin_module/bussiness/entities"
 	crypto "gomux_gorm/src/signin_module/frameworks/crypto"
 	repositories "gomux_gorm/src/signin_module/frameworks/repositories"
@@ -24,13 +24,13 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 	userAlreadyRegistered := (*u.userRepository).FindByEmail(user.Email)
 
 	if userAlreadyRegistered.ID != 0 {
-		return &core.ConflictError{}
+		return &http.ConflictError{}
 	}
 
 	hashPassword, err := (*u.crypto).HashPassword(user.Password)
 
 	if err != nil {
-		return &core.UnauthorizedError{}
+		return &http.UnauthorizedError{}
 	}
 	user.Password = hashPassword
 
