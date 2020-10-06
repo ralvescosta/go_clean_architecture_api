@@ -2,7 +2,6 @@ package sessionapplicationusecases
 
 import (
 	"errors"
-	"fmt"
 
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 	crypto "gomux_gorm/src/session_module/frameworks/crypto"
@@ -37,8 +36,20 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 		return nil, errors.New("Wrong Credentials")
 	}
 
-	userPermission := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
-	fmt.Println(userPermission)
+	userPermissions := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
+
+	var err error = nil
+
+	for _, element := range *userPermissions {
+		if element.PermissionID == 0 || element.PermissionID == 1 {
+			err = errors.New("User do not have permission")
+			break
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
 
 	token, err := (*u.token).CreateToken(user.ID)
 	session.AccessToken = token

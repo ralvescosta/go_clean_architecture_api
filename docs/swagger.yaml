@@ -1,0 +1,65 @@
+swagger: "2.0"
+info:
+  description: "Api Documentation"
+  version: "1.0.0"
+  title: "Go Clean Architecture"
+  contact:
+    email: "rafael.rac.mg@gmail.com"
+  license:
+    name: "MIT"
+    url: ""
+host: "localhost:4000"
+basePath: "/"
+tags:
+- name: "signin"
+  description: "Create an user account"
+- name: "session"
+  description: "Create an user session"
+schemes:
+- "http"
+paths:
+  /signin:
+    post:
+      tags:
+      - "signin"
+      summary: "Create new user"
+      description: ""
+      operationId: "signin"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Create User Form"
+        required: true
+        schema:
+          $ref: "#/definitions/CreateUser"
+      responses:
+        "405":
+          description: "Invalid input"
+      security:
+      - bearerAuth: []
+    
+securityDefinitions:
+  bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+definitions: 
+  CreateUser:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      lastName:
+        type: "string"
+      email:
+        type: "string"
+      password:
+        type: "string"
+
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
