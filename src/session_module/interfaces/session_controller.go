@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	core "gomux_gorm/src/core/errors"
 	usecases "gomux_gorm/src/session_module/application/usecases"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 )
@@ -46,9 +47,30 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 
 	user, err := (*c.usecase).SessionUsecase(&body, &session)
 
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
+	switch err.(type) {
+	// case *core.BadRequestError:
+	// 	res.WriteHeader(http.StatusInternalServerError)
+	// 	res.Write([]byte(`{"message": "User Credentials are wrong"}`))
+	// 	return
+	case *core.UnauthorizedError:
+		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte(`{"message": "User Credentials are wrong"}`))
+		return
+	case *core.ForbiddenError:
+		res.WriteHeader(http.StatusForbidden)
+		res.Write([]byte(`{"message": "User is not allowed"}`))
+		return
+	case *core.NotFoundError:
+		res.WriteHeader(http.StatusNotFound)
+		res.Write([]byte(`{"message": "User not found"}`))
+		return
+	case *core.UnsupportedMediaTypeError:
+		res.WriteHeader(http.StatusUnsupportedMediaType)
+		res.Write([]byte(`{"message": "Wrong Body format"}`))
+		return
+	case *core.InternalServerError:
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Write([]byte(`{"message": "Internal Server Error"}`))
 		return
 	}
 

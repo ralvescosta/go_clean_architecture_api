@@ -1,8 +1,7 @@
 package sessionapplicationusecases
 
 import (
-	"errors"
-
+	core "gomux_gorm/src/core/errors"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
 	crypto "gomux_gorm/src/session_module/frameworks/crypto"
 	repositories "gomux_gorm/src/session_module/frameworks/repositories"
@@ -25,24 +24,20 @@ type ISessionUsecase interface {
 // SessionUsecase ...
 func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error) {
 	user := (*u.userRepository).FindByEmail(userInput.Email)
-
 	if user.ID == 0 {
-		return nil, errors.New("user do not exist")
+		return nil, &core.NotFoundError{}
 	}
 
 	check := (*u.crypto).CheckPasswordHash(userInput.Password, user.Password)
-
 	if !check {
-		return nil, errors.New("Wrong Credentials")
+		return nil, &core.UnauthorizedError{}
 	}
 
 	userPermissions := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
-
 	var err error = nil
-
 	for _, element := range *userPermissions {
 		if element.PermissionID == 0 || element.PermissionID == 1 {
-			err = errors.New("User do not have permission")
+			err = &core.ForbiddenError{}
 			break
 		}
 	}
@@ -52,13 +47,12 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 	}
 
 	token, err := (*u.token).CreateToken(user.ID)
+	if err != nil {
+		return nil, &core.InternalServerError{}
+	}
 	session.AccessToken = token
 
 	(*u.sessionRepository).Create(session, user)
-
-	if err != nil {
-		return nil, errors.New("JWT Error")
-	}
 
 	return &bussiness.UserSessionEntity{
 		Name:        user.Name,
