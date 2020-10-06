@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	core "gomux_gorm/src/core/errors"
 	usecases "gomux_gorm/src/signin_module/application/usecases"
 	bussiness "gomux_gorm/src/signin_module/bussiness/entities"
 )
@@ -37,9 +38,30 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 
 	err = (*c.usecase).SigninUsecase(&body)
 
-	if err != nil {
+	switch err.(type) {
+	case *core.UnauthorizedError:
+		res.WriteHeader(http.StatusUnauthorized)
+		res.Write([]byte(`{"message": "User Credentials are wrong"}`))
+		return
+	case *core.ForbiddenError:
+		res.WriteHeader(http.StatusForbidden)
+		res.Write([]byte(`{"message": "User is not allowed"}`))
+		return
+	case *core.NotFoundError:
+		res.WriteHeader(http.StatusNotFound)
+		res.Write([]byte(`{"message": "User not found"}`))
+		return
+	case *core.ConflictError:
+		res.WriteHeader(http.StatusConflict)
+		res.Write([]byte(`{"message": "User not found"}`))
+		return
+	case *core.UnsupportedMediaTypeError:
+		res.WriteHeader(http.StatusUnsupportedMediaType)
+		res.Write([]byte(`{"message": "Wrong Body format"}`))
+		return
+	case *core.InternalServerError:
 		res.WriteHeader(http.StatusInternalServerError)
-		res.Write([]byte(`{"message": "User Already Exist"}`))
+		res.Write([]byte(`{"message": "Internal Server Error"}`))
 		return
 	}
 

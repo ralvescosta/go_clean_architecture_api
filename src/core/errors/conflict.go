@@ -2,14 +2,15 @@ package core
 
 import "fmt"
 
-// UnauthorizedError ...
-type UnauthorizedError struct {
+// ConflictError ...
+type ConflictError struct {
 	status uint16
 	method string
 }
 
-func (err *UnauthorizedError) Error() string {
-	err.status = 401
+// ConflictError ...
+func (err *ConflictError) Error() string {
+	err.status = 409
 
 	return fmt.Sprintf("Something went wrong with the %v request. Server returned %v status.",
 		err.method, err.status)

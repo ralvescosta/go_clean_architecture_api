@@ -1,9 +1,17 @@
 package core
 
+import "fmt"
+
 // ForbiddenError ...
-type ForbiddenError struct{}
+type ForbiddenError struct {
+	status uint16
+	method string
+}
 
 // Forbidden ...
-func (*ForbiddenError) Error() string {
-	return "403 - Forbidden Error"
+func (err *ForbiddenError) Error() string {
+	err.status = 403
+
+	return fmt.Sprintf("Something went wrong with the %v request. Server returned %v status.",
+		err.method, err.status)
 }

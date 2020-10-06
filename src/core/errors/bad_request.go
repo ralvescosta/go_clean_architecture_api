@@ -1,9 +1,17 @@
 package core
 
+import "fmt"
+
 // BadRequestError ...
-type BadRequestError struct{}
+type BadRequestError struct {
+	status uint16
+	method string
+}
 
 // BadRequest ...
-func (*BadRequestError) Error() string {
-	return "400 - Bad Request Error"
+func (err *BadRequestError) Error() string {
+	err.status = 400
+
+	return fmt.Sprintf("Something went wrong with the %v request. Server returned %v status.",
+		err.method, err.status)
 }

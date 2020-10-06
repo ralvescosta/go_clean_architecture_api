@@ -1,8 +1,16 @@
 package core
 
-// NotFoundError ...
-type NotFoundError struct{}
+import "fmt"
 
-func (*NotFoundError) Error() string {
-	return "404 - Not Found Error"
+// NotFoundError ...
+type NotFoundError struct {
+	status uint16
+	method string
+}
+
+func (err *NotFoundError) Error() string {
+	err.status = 404
+
+	return fmt.Sprintf("Something went wrong with the %v request. Server returned %v status.",
+		err.method, err.status)
 }

@@ -1,8 +1,16 @@
 package core
 
-// UnsupportedMediaTypeError ...
-type UnsupportedMediaTypeError struct{}
+import "fmt"
 
-func (*UnsupportedMediaTypeError) Error() string {
-	return "415 - Unsupported Media Type Error"
+// UnsupportedMediaTypeError ...
+type UnsupportedMediaTypeError struct {
+	status uint16
+	method string
+}
+
+func (err *UnsupportedMediaTypeError) Error() string {
+	err.status = 415
+
+	return fmt.Sprintf("Something went wrong with the %v request. Server returned %v status.",
+		err.method, err.status)
 }
