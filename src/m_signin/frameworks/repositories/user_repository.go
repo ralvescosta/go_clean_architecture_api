@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	tables "gomux_gorm/src/core/database/table_models"
-	entities "gomux_gorm/src/signin_module/bussiness/entities"
+	entities "gomux_gorm/src/m_signin/bussiness/entities"
 )
 
 type userRepository struct {

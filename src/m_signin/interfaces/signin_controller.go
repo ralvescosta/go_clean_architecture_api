@@ -1,28 +1,27 @@
-package sessioninterfaces
+package signininterfaces
 
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
-	core "gomux_gorm/src/core/http_response"
-	usecases "gomux_gorm/src/session_module/application/usecases"
-	bussiness "gomux_gorm/src/session_module/bussiness/entities"
+	core "gomux_gorm/src/core/errors"
+	usecases "gomux_gorm/src/m_signin/application/usecases"
+	bussiness "gomux_gorm/src/m_signin/bussiness/entities"
 )
 
-// ISessionController ...
-type ISessionController interface {
+// ISigninController ...
+type ISigninController interface {
 	Handle(res http.ResponseWriter, req *http.Request)
 }
 
 type controller struct {
-	usecase *usecases.ISessionUsecase
+	usecase *usecases.ISigninUsecase
 }
 
 // Handle ...
 func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 
-	var body bussiness.UsersInput
+	var body bussiness.RegisterUsersEntity
 	err := json.NewDecoder(req.Body).Decode(&body)
 
 	if err != nil {
@@ -31,27 +30,15 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if body.Email == "" || body.Password == "" {
+	if body.Name == "" || body.LastName == "" || body.Email == "" || body.Password == "" {
 		res.WriteHeader(http.StatusUnsupportedMediaType)
 		res.Write([]byte(`{"message": "Body wrong format"}`))
 		return
 	}
 
-	host := strings.Split(req.Host, ":")
-	session := bussiness.SessionEntity{
-		Agent:         req.Header["User-Agent"][0],
-		RemoteAddress: req.RemoteAddr,
-		LocalAddress:  host[0],
-		LocalPort:     host[1],
-	}
-
-	user, err := (*c.usecase).SessionUsecase(&body, &session)
+	err = (*c.usecase).SigninUsecase(&body)
 
 	switch err.(type) {
-	// case *core.BadRequestError:
-	// 	res.WriteHeader(http.StatusInternalServerError)
-	// 	res.Write([]byte(`{"message": "User Credentials are wrong"}`))
-	// 	return
 	case *core.UnauthorizedError:
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte(`{"message": "User Credentials are wrong"}`))
@@ -62,6 +49,10 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 		return
 	case *core.NotFoundError:
 		res.WriteHeader(http.StatusNotFound)
+		res.Write([]byte(`{"message": "User not found"}`))
+		return
+	case *core.ConflictError:
+		res.WriteHeader(http.StatusConflict)
 		res.Write([]byte(`{"message": "User not found"}`))
 		return
 	case *core.UnsupportedMediaTypeError:
@@ -75,10 +66,10 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 	}
 
 	res.WriteHeader(http.StatusCreated)
-	json.NewEncoder(res).Encode(user)
+	res.Write([]byte(`{}`))
 }
 
-// SessionController ...
-func SessionController(usecase *usecases.ISessionUsecase) ISessionController {
+// SigninController ...
+func SigninController(usecase *usecases.ISigninUsecase) ISigninController {
 	return &controller{usecase}
 }

@@ -12,16 +12,16 @@ import (
 
 	core "gomux_gorm/src/core/database"
 
-	signinUsecases "gomux_gorm/src/signin_module/application/usecases"
-	signinCrypto "gomux_gorm/src/signin_module/frameworks/crypto"
-	signinRepositories "gomux_gorm/src/signin_module/frameworks/repositories"
-	signinControllers "gomux_gorm/src/signin_module/interfaces"
+	signinUsecases "gomux_gorm/src/m_signin/application/usecases"
+	signinCrypto "gomux_gorm/src/m_signin/frameworks/crypto"
+	signinRepositories "gomux_gorm/src/m_signin/frameworks/repositories"
+	signinControllers "gomux_gorm/src/m_signin/interfaces"
 
-	sessionUsecases "gomux_gorm/src/session_module/application/usecases"
-	sessionCrypto "gomux_gorm/src/session_module/frameworks/crypto"
-	sessionRepositories "gomux_gorm/src/session_module/frameworks/repositories"
-	sessionToken "gomux_gorm/src/session_module/frameworks/token"
-	sessionControllers "gomux_gorm/src/session_module/interfaces"
+	sessionUsecases "gomux_gorm/src/m_session/application/usecases"
+	sessionCrypto "gomux_gorm/src/m_session/frameworks/crypto"
+	sessionRepositories "gomux_gorm/src/m_session/frameworks/repositories"
+	sessionToken "gomux_gorm/src/m_session/frameworks/token"
+	sessionControllers "gomux_gorm/src/m_session/interfaces"
 )
 
 type module struct {

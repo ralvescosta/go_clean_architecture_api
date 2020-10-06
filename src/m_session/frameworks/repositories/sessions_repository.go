@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	tables "gomux_gorm/src/core/database/table_models"
-	bussiness "gomux_gorm/src/session_module/bussiness/entities"
+	bussiness "gomux_gorm/src/m_session/bussiness/entities"
 )
 
 type sessionRepository struct {

@@ -1,10 +1,10 @@
 package signinapplicationusecases
 
 import (
-	http "gomux_gorm/src/core/http_response"
-	bussiness "gomux_gorm/src/signin_module/bussiness/entities"
-	crypto "gomux_gorm/src/signin_module/frameworks/crypto"
-	repositories "gomux_gorm/src/signin_module/frameworks/repositories"
+	core "gomux_gorm/src/core/errors"
+	bussiness "gomux_gorm/src/m_signin/bussiness/entities"
+	crypto "gomux_gorm/src/m_signin/frameworks/crypto"
+	repositories "gomux_gorm/src/m_signin/frameworks/repositories"
 )
 
 type usecase struct {
@@ -24,13 +24,13 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 	userAlreadyRegistered := (*u.userRepository).FindByEmail(user.Email)
 
 	if userAlreadyRegistered.ID != 0 {
-		return &http.ConflictError{}
+		return &core.ConflictError{}
 	}
 
 	hashPassword, err := (*u.crypto).HashPassword(user.Password)
 
 	if err != nil {
-		return &http.UnauthorizedError{}
+		return &core.UnauthorizedError{}
 	}
 	user.Password = hashPassword
 
