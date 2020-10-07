@@ -43,6 +43,7 @@ func (m *module) StartHTTPServer() {
 	m.conn = conn
 
 	router := mux.NewRouter()
+
 	router.Use(headersMiddleware)
 
 	m.registerRouters(router)
