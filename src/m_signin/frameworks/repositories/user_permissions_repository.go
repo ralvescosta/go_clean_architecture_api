@@ -30,7 +30,7 @@ func (r *usersPermissionsRepository) Create(user *tables.Users, permissionID int
 	return &userPermission
 }
 
-// UsersPermissionsRepositoryConstructor ...
-func UsersPermissionsRepositoryConstructor(db *gorm.DB) IUsersPermissionsRepository {
+// UsersPermissionsRepository ...
+func UsersPermissionsRepository(db *gorm.DB) IUsersPermissionsRepository {
 	return &usersPermissionsRepository{db}
 }

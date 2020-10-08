@@ -48,10 +48,6 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 	user, err := (*c.usecase).SessionUsecase(&body, &session)
 
 	switch err.(type) {
-	// case *core.BadRequestError:
-	// 	res.WriteHeader(http.StatusInternalServerError)
-	// 	res.Write([]byte(`{"message": "User Credentials are wrong"}`))
-	// 	return
 	case *core.UnauthorizedError:
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte(`{"message": "User Credentials are wrong"}`))

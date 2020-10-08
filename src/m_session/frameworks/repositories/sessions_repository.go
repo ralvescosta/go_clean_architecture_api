@@ -31,7 +31,7 @@ func (r *sessionRepository) Create(session *bussiness.SessionEntity, user *table
 	})
 }
 
-// SessionRepositoryConstructor ...
-func SessionRepositoryConstructor(db *gorm.DB) ISessionRepository {
+// SessionRepository ...
+func SessionRepository(db *gorm.DB) ISessionRepository {
 	return &sessionRepository{db}
 }

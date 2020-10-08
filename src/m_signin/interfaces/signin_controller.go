@@ -47,13 +47,9 @@ func (c *controller) Handle(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusForbidden)
 		res.Write([]byte(`{"message": "User is not allowed"}`))
 		return
-	case *core.NotFoundError:
-		res.WriteHeader(http.StatusNotFound)
-		res.Write([]byte(`{"message": "User not found"}`))
-		return
 	case *core.ConflictError:
 		res.WriteHeader(http.StatusConflict)
-		res.Write([]byte(`{"message": "User not found"}`))
+		res.Write([]byte(`{"message": "User Already exist"}`))
 		return
 	case *core.UnsupportedMediaTypeError:
 		res.WriteHeader(http.StatusUnsupportedMediaType)

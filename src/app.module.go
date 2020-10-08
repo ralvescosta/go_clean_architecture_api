@@ -22,6 +22,8 @@ import (
 	sessionRepositories "gomux_gorm/src/m_session/frameworks/repositories"
 	sessionToken "gomux_gorm/src/m_session/frameworks/token"
 	sessionControllers "gomux_gorm/src/m_session/interfaces"
+
+	authMiddleware "gomux_gorm/src/m_auth/interfaces"
 )
 
 type module struct {
@@ -65,21 +67,31 @@ func (m *module) registerRouters(router *mux.Router) {
 		fmt.Fprint(res, "{\"status\": \"ok\"}")
 	})
 
-	_signinCrypto := signinCrypto.HashConstructor()
-	_signinUserRepository := signinRepositories.UserRepositoryConstructor(m.conn)
-	_signinUsersPermissionsRepository := signinRepositories.UsersPermissionsRepositoryConstructor(m.conn)
-	_signinUsecase := signinUsecases.SigninUsecaseConstructor(&_signinUserRepository, &_signinUsersPermissionsRepository, &_signinCrypto)
+	_signinCrypto := signinCrypto.Hash()
+	_signinUserRepository := signinRepositories.UserRepository(m.conn)
+	_signinUsersPermissionsRepository := signinRepositories.UsersPermissionsRepository(m.conn)
+	_signinUsecase := signinUsecases.SigninUsecase(&_signinUserRepository, &_signinUsersPermissionsRepository, &_signinCrypto)
 	_signinController := signinControllers.SigninController(&_signinUsecase)
 	router.HandleFunc("/signin", _signinController.Handle).Methods("POST")
 
-	_sessionCrypto := sessionCrypto.HashConstructor()
-	_sessionToken := sessionToken.TokenConstructor()
-	_sessionUserRepository := sessionRepositories.UserRepositoryConstructor(m.conn)
-	_sessionSessionRepository := sessionRepositories.SessionRepositoryConstructor(m.conn)
-	_sessionUsersPermissionsRepository := sessionRepositories.UsersPermissionsRepositoryConstructor(m.conn)
-	_sessionUsecase := sessionUsecases.SessionUsecaseConstructor(&_sessionUserRepository, &_sessionSessionRepository, &_sessionUsersPermissionsRepository, &_sessionCrypto, &_sessionToken)
+	_sessionCrypto := sessionCrypto.Hash()
+	_sessionToken := sessionToken.Token()
+	_sessionUserRepository := sessionRepositories.UserRepository(m.conn)
+	_sessionSessionRepository := sessionRepositories.SessionRepository(m.conn)
+	_sessionUsersPermissionsRepository := sessionRepositories.UsersPermissionsRepository(m.conn)
+	_sessionUsecase := sessionUsecases.SessionUsecase(&_sessionUserRepository, &_sessionSessionRepository, &_sessionUsersPermissionsRepository, &_sessionCrypto, &_sessionToken)
 	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
 	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
+
+	booksGroup := router.PathPrefix("/books").Subrouter()
+	booksGroup.Use(authMiddleware.Handle)
+	booksGroup.HandleFunc("", func(res http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(res, "Hello World")
+	}).Methods("GET")
+	router.HandleFunc("/books2", func(res http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(res, "Hello World - 2")
+	}).Methods("GET")
+
 }
 
 func headersMiddleware(next http.Handler) http.Handler {

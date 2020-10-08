@@ -23,7 +23,7 @@ func (r *userRepository) FindByEmail(email string) *tables.Users {
 	return &user
 }
 
-// UserRepositoryConstructor ...
-func UserRepositoryConstructor(db *gorm.DB) IUserRepository {
+// UserRepository ...
+func UserRepository(db *gorm.DB) IUserRepository {
 	return &userRepository{db}
 }

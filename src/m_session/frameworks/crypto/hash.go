@@ -15,7 +15,7 @@ func (*hash) CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-// HashConstructor ...
-func HashConstructor() IHasher {
+// Hash ...
+func Hash() IHasher {
 	return &hash{}
 }

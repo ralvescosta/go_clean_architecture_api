@@ -23,7 +23,7 @@ func (r *userPermissionsRepository) FindUserPermissions(userID int64) *[]tables.
 	return &userPermissions
 }
 
-// UsersPermissionsRepositoryConstructor ...
-func UsersPermissionsRepositoryConstructor(db *gorm.DB) IUsersPermissionsRepository {
+// UsersPermissionsRepository ...
+func UsersPermissionsRepository(db *gorm.DB) IUsersPermissionsRepository {
 	return &userPermissionsRepository{db}
 }

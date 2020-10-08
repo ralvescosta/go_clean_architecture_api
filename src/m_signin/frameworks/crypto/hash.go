@@ -15,8 +15,8 @@ func (*hash) HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-// HashConstructor ...
-func HashConstructor() IHasher {
+// Hash ...
+func Hash() IHasher {
 	return &hash{}
 }
 

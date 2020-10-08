@@ -34,19 +34,23 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 	}
 
 	userPermissions := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
+
+	var userPermissionID *int64
+
 	var err error = nil
 	for _, element := range *userPermissions {
 		if element.PermissionID == 0 || element.PermissionID == 1 {
 			err = &core.ForbiddenError{}
 			break
 		}
+		userPermissionID = &element.PermissionID
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	token, err := (*u.token).CreateToken(user.ID)
+	token, err := (*u.token).CreateToken(&user.ID, userPermissionID)
 	if err != nil {
 		return nil, &core.InternalServerError{}
 	}
@@ -63,8 +67,8 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 	}, nil
 }
 
-// SessionUsecaseConstructor ...
-func SessionUsecaseConstructor(
+// SessionUsecase ...
+func SessionUsecase(
 	userRepository *repositories.IUserRepository,
 	sessionRepository *repositories.ISessionRepository,
 	usersPermissionsRepository *repositories.IUsersPermissionsRepository,

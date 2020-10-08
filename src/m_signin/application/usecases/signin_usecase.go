@@ -40,7 +40,7 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 	return nil
 }
 
-// SigninUsecaseConstructor ...
-func SigninUsecaseConstructor(userRepository *repositories.IUserRepository, usersPermissionsRepository *repositories.IUsersPermissionsRepository, crypto *crypto.IHasher) ISigninUsecase {
+// SigninUsecase ...
+func SigninUsecase(userRepository *repositories.IUserRepository, usersPermissionsRepository *repositories.IUsersPermissionsRepository, crypto *crypto.IHasher) ISigninUsecase {
 	return &usecase{userRepository, usersPermissionsRepository, crypto}
 }
