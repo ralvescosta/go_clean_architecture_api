@@ -23,6 +23,9 @@ import (
 	sessionToken "gomux_gorm/src/m_session/frameworks/token"
 	sessionControllers "gomux_gorm/src/m_session/interfaces"
 
+	authUsecases "gomux_gorm/src/m_auth/application/usecases"
+	authRepositories "gomux_gorm/src/m_auth/frameworks/repositories"
+	authToken "gomux_gorm/src/m_auth/frameworks/token"
 	authMiddleware "gomux_gorm/src/m_auth/interfaces"
 )
 
@@ -75,16 +78,21 @@ func (m *module) registerRouters(router *mux.Router) {
 	router.HandleFunc("/signin", _signinController.Handle).Methods("POST")
 
 	_sessionCrypto := sessionCrypto.Hash()
-	_sessionToken := sessionToken.Token()
+	_sessionCreateToken := sessionToken.CreateToken()
 	_sessionUserRepository := sessionRepositories.UserRepository(m.conn)
 	_sessionSessionRepository := sessionRepositories.SessionRepository(m.conn)
 	_sessionUsersPermissionsRepository := sessionRepositories.UsersPermissionsRepository(m.conn)
-	_sessionUsecase := sessionUsecases.SessionUsecase(&_sessionUserRepository, &_sessionSessionRepository, &_sessionUsersPermissionsRepository, &_sessionCrypto, &_sessionToken)
+	_sessionUsecase := sessionUsecases.SessionUsecase(&_sessionUserRepository, &_sessionSessionRepository, &_sessionUsersPermissionsRepository, &_sessionCrypto, &_sessionCreateToken)
 	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
 	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
 
+	_authToken := authToken.DecodedToken()
+	_authUserRepository := authRepositories.UserRepository(m.conn)
+	_authUsecase := authUsecases.AuthUsecase(&_authToken, &_authUserRepository)
+	_authMiddleware := authMiddleware.AuthMiddleware(&_authUsecase)
+
 	booksGroup := router.PathPrefix("/books").Subrouter()
-	booksGroup.Use(authMiddleware.Handle)
+	booksGroup.Use(_authMiddleware.Handle)
 	booksGroup.HandleFunc("", func(res http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(res, "Hello World")
 	}).Methods("GET")

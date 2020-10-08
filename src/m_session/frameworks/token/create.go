@@ -6,15 +6,15 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// IToken ...
-type IToken interface {
+// ICreateToken ...
+type ICreateToken interface {
 	CreateToken(userID *int64, permissionID *int64) (string, error)
 }
 
-type token struct{}
+type createToken struct{}
 
 // CreateToken ...
-func (*token) CreateToken(userID *int64, permissionID *int64) (string, error) {
+func (*createToken) CreateToken(userID *int64, permissionID *int64) (string, error) {
 	var err error
 
 	atClaims := jwt.MapClaims{}
@@ -30,7 +30,7 @@ func (*token) CreateToken(userID *int64, permissionID *int64) (string, error) {
 	return token, nil
 }
 
-// Token ...
-func Token() IToken {
-	return &token{}
+// CreateToken ...
+func CreateToken() ICreateToken {
+	return &createToken{}
 }

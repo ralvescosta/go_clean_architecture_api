@@ -13,7 +13,7 @@ type usecase struct {
 	sessionRepository          *repositories.ISessionRepository
 	usersPermissionsRepository *repositories.IUsersPermissionsRepository
 	crypto                     *crypto.IHasher
-	token                      *token.IToken
+	token                      *token.ICreateToken
 }
 
 // ISessionUsecase ...
@@ -72,7 +72,8 @@ func SessionUsecase(
 	userRepository *repositories.IUserRepository,
 	sessionRepository *repositories.ISessionRepository,
 	usersPermissionsRepository *repositories.IUsersPermissionsRepository,
-	crypto *crypto.IHasher, token *token.IToken,
+	crypto *crypto.IHasher,
+	token *token.ICreateToken,
 ) ISessionUsecase {
 	return &usecase{userRepository, sessionRepository, usersPermissionsRepository, crypto, token}
 }
