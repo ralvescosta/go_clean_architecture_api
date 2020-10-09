@@ -10,23 +10,25 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 
-	core "gomux_gorm/src/core/database"
+	database "gomux_gorm/src/core_module/frameworks/database"
 
-	signinUsecases "gomux_gorm/src/m_signin/application/usecases"
-	signinCrypto "gomux_gorm/src/m_signin/frameworks/crypto"
-	signinRepositories "gomux_gorm/src/m_signin/frameworks/repositories"
-	signinControllers "gomux_gorm/src/m_signin/interfaces"
+	signinUsecases "gomux_gorm/src/signin_module/application/usecases"
+	signinCrypto "gomux_gorm/src/signin_module/frameworks/crypto"
+	signinRepositories "gomux_gorm/src/signin_module/frameworks/repositories"
+	signinControllers "gomux_gorm/src/signin_module/interfaces"
 
-	sessionUsecases "gomux_gorm/src/m_session/application/usecases"
-	sessionCrypto "gomux_gorm/src/m_session/frameworks/crypto"
-	sessionRepositories "gomux_gorm/src/m_session/frameworks/repositories"
-	sessionToken "gomux_gorm/src/m_session/frameworks/token"
-	sessionControllers "gomux_gorm/src/m_session/interfaces"
+	sessionUsecases "gomux_gorm/src/session_module/application/usecases"
+	sessionCrypto "gomux_gorm/src/session_module/frameworks/crypto"
+	sessionRepositories "gomux_gorm/src/session_module/frameworks/repositories"
+	sessionToken "gomux_gorm/src/session_module/frameworks/token"
+	sessionControllers "gomux_gorm/src/session_module/interfaces"
 
-	authUsecases "gomux_gorm/src/m_auth/application/usecases"
-	authRepositories "gomux_gorm/src/m_auth/frameworks/repositories"
-	authToken "gomux_gorm/src/m_auth/frameworks/token"
-	authMiddleware "gomux_gorm/src/m_auth/interfaces"
+	authUsecases "gomux_gorm/src/auth_module/application/usecases"
+	authRepositories "gomux_gorm/src/auth_module/frameworks/repositories"
+	authToken "gomux_gorm/src/auth_module/frameworks/token"
+	authMiddleware "gomux_gorm/src/auth_module/interfaces"
+
+	booksControllers "gomux_gorm/src/books_module/interfaces"
 )
 
 type module struct {
@@ -40,9 +42,9 @@ type IHttpServer interface {
 
 // StartHTTPServer ...
 func (m *module) StartHTTPServer() {
-	const PORT string = ":4000"
+	const PORT string = ":4001"
 
-	conn := core.ConnectToDatabase()
+	conn := database.ConnectToDatabase()
 	defer conn.Close()
 
 	m.conn = conn
@@ -91,14 +93,10 @@ func (m *module) registerRouters(router *mux.Router) {
 	_authUsecase := authUsecases.AuthUsecase(&_authToken, &_authUserRepository)
 	_authMiddleware := authMiddleware.AuthMiddleware(&_authUsecase)
 
+	_booksController := booksControllers.BooksController()
 	booksGroup := router.PathPrefix("/books").Subrouter()
 	booksGroup.Use(_authMiddleware.Handle)
-	booksGroup.HandleFunc("", func(res http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(res, "Hello World")
-	}).Methods("GET")
-	router.HandleFunc("/books2", func(res http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(res, "Hello World - 2")
-	}).Methods("GET")
+	booksGroup.HandleFunc("", _booksController.Handle).Methods("GET")
 
 }
 
