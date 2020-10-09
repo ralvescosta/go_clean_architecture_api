@@ -10,7 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 
-	database "gomux_gorm/src/core_module/frameworks/database"
+	coreDatabase "gomux_gorm/src/core_module/frameworks/database"
+	coreMiddleware "gomux_gorm/src/core_module/interfaces"
 
 	signinUsecases "gomux_gorm/src/signin_module/application/usecases"
 	signinCrypto "gomux_gorm/src/signin_module/frameworks/crypto"
@@ -44,14 +45,14 @@ type IHttpServer interface {
 func (m *module) StartHTTPServer() {
 	const PORT string = ":4001"
 
-	conn := database.ConnectToDatabase()
+	conn := coreDatabase.ConnectToDatabase()
 	defer conn.Close()
 
 	m.conn = conn
 
 	router := mux.NewRouter()
 
-	router.Use(headersMiddleware)
+	router.Use(coreMiddleware.HeadersMiddleware)
 
 	m.registerRouters(router)
 
@@ -98,27 +99,6 @@ func (m *module) registerRouters(router *mux.Router) {
 	booksGroup.Use(_authMiddleware.Handle)
 	booksGroup.HandleFunc("", _booksController.Handle).Methods("GET")
 
-}
-
-func headersMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/json; charset=utf-8")
-		w.Header().Add("X-DNS-Prefetch-Control", "off")
-		w.Header().Add("X-Frame-Options", "SAMEORIGIN")
-		w.Header().Add("Strict-Transport-Security", "max-age=15552000; includeSubDomains")
-		w.Header().Add("X-Download-Options", "noopen")
-		w.Header().Add("X-Content-Type-Options", "nosniff")
-		w.Header().Add("X-XSS-Protection", "1; mode=block")
-		w.Header().Add("Content-Security-Policy", "default-src 'none'")
-		w.Header().Add("X-Content-Security-Policy", "default-src 'none'")
-		w.Header().Add("X-WebKit-CSP", "default-src 'none'")
-		w.Header().Add("X-Permitted-Cross-Domain-Policies", "none")
-		w.Header().Add("Referrer-Policy", "origin-when-cross-origin,strict-origin-when-cross-origin")
-		w.Header().Add("Access-Control-Allow-Origin	", "*")
-		w.Header().Add("Vary", "Accept-Encoding")
-
-		next.ServeHTTP(w, r)
-	})
 }
 
 // HTTPServerController ...
