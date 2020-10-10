@@ -16,11 +16,11 @@ type IUsersPermissionsRepository interface {
 }
 
 func (r *userPermissionsRepository) FindUserPermissions(userID int64) *[]tables.UsersPermissions {
-	userPermissions := []tables.UsersPermissions{}
+	userPermissions := &[]tables.UsersPermissions{}
 
-	r.db.Find(&userPermissions, "id =?", userID)
+	r.db.Find(userPermissions, "id =?", userID)
 
-	return &userPermissions
+	return userPermissions
 }
 
 // UsersPermissionsRepository ...

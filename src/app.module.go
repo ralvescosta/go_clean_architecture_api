@@ -43,7 +43,7 @@ type IHttpServer interface {
 
 // StartHTTPServer ...
 func (m *module) StartHTTPServer() {
-	const PORT string = ":4001"
+	const PORT string = ":4000"
 
 	conn := coreDatabase.ConnectToDatabase()
 	defer conn.Close()
@@ -91,12 +91,13 @@ func (m *module) registerRouters(router *mux.Router) {
 
 	_authToken := authToken.DecodedToken()
 	_authUserRepository := authRepositories.UserRepository(m.conn)
-	_authUsecase := authUsecases.AuthUsecase(&_authToken, &_authUserRepository)
+	_authPermissionRepository := authRepositories.PermissionRepository(m.conn)
+	_authUsecase := authUsecases.AuthUsecase(&_authToken, &_authUserRepository, &_authPermissionRepository)
 	_authMiddleware := authMiddleware.AuthMiddleware(&_authUsecase)
 
 	_booksController := booksControllers.BooksController()
 	booksGroup := router.PathPrefix("/books").Subrouter()
-	booksGroup.Use(_authMiddleware.Handle)
+	booksGroup.Use(_authMiddleware.Auth("admin"))
 	booksGroup.HandleFunc("", _booksController.Handle).Methods("GET")
 
 }

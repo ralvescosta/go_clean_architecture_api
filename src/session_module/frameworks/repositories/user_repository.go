@@ -16,11 +16,11 @@ type IUserRepository interface {
 }
 
 func (r *userRepository) FindByEmail(email string) *tables.Users {
-	user := tables.Users{}
+	user := &tables.Users{}
 
 	r.db.First(&user, "email =?", email)
 
-	return &user
+	return user
 }
 
 // UserRepository ...

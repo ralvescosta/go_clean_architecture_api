@@ -17,11 +17,11 @@ type IUserRepository interface {
 
 // FindByID ...
 func (r *userRepository) FindByID(id int64) *tables.Users {
-	user := tables.Users{}
+	user := &tables.Users{}
 
-	r.db.First(&user, "id =?", id)
+	r.db.First(user, "id =?", id)
 
-	return &user
+	return user
 }
 
 // UserRepository ...
