@@ -55,13 +55,11 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">gomux_gorm/src/session_module/application/usecases/blabla.go (66.7%)</option>
+				<option value="file0">gomux_gorm/src/auth_module/application/usecases/auth_usecase.go (77.8%)</option>
 				
-				<option value="file1">gomux_gorm/src/session_module/application/usecases/session_usecase.go (0.0%)</option>
+				<option value="file1">gomux_gorm/src/session_module/application/usecases/session_usecase.go (17.4%)</option>
 				
-				<option value="file2">gomux_gorm/src/signin_module/application/usecases/blabla.go (66.7%)</option>
-				
-				<option value="file3">gomux_gorm/src/signin_module/application/usecases/signin_usecase.go (81.8%)</option>
+				<option value="file2">gomux_gorm/src/signin_module/application/usecases/signin_usecase.go (81.8%)</option>
 				
 				</select>
 			</div>
@@ -75,14 +73,53 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">package sessionapplicationusecases
+		<pre class="file" id="file0" style="display: none">package authapplicationusecases
 
-func BlaBla(ok int) string <span class="cov8" title="1">{
-        if ok == 1 </span><span class="cov8" title="1">{
-                return "1"
-        }</span>
-        <span class="cov0" title="0">return "2"</span>
+import (
+        bussiness "gomux_gorm/src/auth_module/bussiness/entities"
+        repositories "gomux_gorm/src/auth_module/frameworks/repositories"
+        token "gomux_gorm/src/auth_module/frameworks/token"
+        core "gomux_gorm/src/core_module/bussiness/errors"
+)
+
+type authUsecase struct {
+        token                *token.IDecodedToken
+        userRepository       *repositories.IUserRepository
+        permissionRepository *repositories.IPermissionRepository
 }
+
+// IAuthUsecase ...
+type IAuthUsecase interface {
+        Auth(token string, role string) (*bussiness.AuthenticatedUser, error)
+}
+
+//Auth ..
+func (u *authUsecase) Auth(token string, role string) (*bussiness.AuthenticatedUser, error) <span class="cov8" title="1">{
+
+        decodedToken, err := (*u.token).Decoded(token)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;core.TokenExpiredError{}
+        }</span>
+
+        <span class="cov8" title="1">user := (*u.userRepository).FindByID(decodedToken.UserID)
+        permission := (*u.permissionRepository).FindByID(decodedToken.PermissionID)
+
+        if permission.Role != role </span><span class="cov0" title="0">{
+                return nil, &amp;core.PermissionNotAllowedError{}
+        }</span>
+
+        <span class="cov8" title="1">return &amp;bussiness.AuthenticatedUser{
+                ID:           user.ID,
+                Name:         user.Name,
+                Email:        user.Email,
+                PermissionID: decodedToken.PermissionID,
+        }, nil</span>
+}
+
+// AuthUsecase ...
+func AuthUsecase(token *token.IDecodedToken, userRepository *repositories.IUserRepository, permissionRepository *repositories.IPermissionRepository) IAuthUsecase <span class="cov8" title="1">{
+        return &amp;authUsecase{token, userRepository, permissionRepository}
+}</span>
 </pre>
 		
 		<pre class="file" id="file1" style="display: none">package sessionapplicationusecases
@@ -109,9 +146,9 @@ type ISessionUsecase interface {
 }
 
 // SessionUsecase ...
-func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error) <span class="cov0" title="0">{
+func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error) <span class="cov8" title="1">{
         user := (*u.userRepository).FindByEmail(userInput.Email)
-        if user.ID == 0 </span><span class="cov0" title="0">{
+        if user.ID == 0 </span><span class="cov8" title="1">{
                 return nil, &amp;core.NotFoundError{}
         }</span>
 
@@ -161,22 +198,12 @@ func SessionUsecase(
         usersPermissionsRepository *repositories.IUsersPermissionsRepository,
         crypto *crypto.IHasher,
         token *token.ICreateToken,
-) ISessionUsecase <span class="cov0" title="0">{
+) ISessionUsecase <span class="cov8" title="1">{
         return &amp;usecase{userRepository, sessionRepository, usersPermissionsRepository, crypto, token}
 }</span>
 </pre>
 		
 		<pre class="file" id="file2" style="display: none">package signinapplicationusecases
-
-func BlaBla(ok int) string <span class="cov8" title="1">{
-        if ok == 1 </span><span class="cov8" title="1">{
-                return "1"
-        }</span>
-        <span class="cov0" title="0">return "2"</span>
-}
-</pre>
-		
-		<pre class="file" id="file3" style="display: none">package signinapplicationusecases
 
 import (
         core "gomux_gorm/src/core_module/bussiness/errors"
