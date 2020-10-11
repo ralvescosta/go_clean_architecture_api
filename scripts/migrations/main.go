@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jinzhu/gorm"
@@ -8,11 +9,12 @@ import (
 )
 
 func main() {
+	fmt.Println("Db connection...")
 	connection, err := gorm.Open("postgres", "user=postgres password=12345 dbname=default sslmode=disable")
-
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer connection.Close()
 
 	database := connection.DB()
 	err = database.Ping()
@@ -20,6 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("Run Migrations...")
 	connection.Exec(`
 		CREATE TABLE users 
 			( 
@@ -82,4 +85,5 @@ func main() {
 					deleted_at TIMESTAMP WITH TIME ZONE
 				)
 		`)
+	fmt.Println("All Done...")
 }
