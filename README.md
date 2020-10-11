@@ -14,3 +14,6 @@ This simple project has the purpose to study Go Lang, Clean Architecture and RES
 
 - RUN: `go run src/*.go`
 - BUILD: `go build src/*.go`
+- TEST ALL FILES: `go test ./src/...`
+- TEST COV: `go test ./src/... -cover`
+- TEST COV: `go test ./src/... -cover -coverprofile=c.out && go tool cover -html=c.out -o coverage.html`
