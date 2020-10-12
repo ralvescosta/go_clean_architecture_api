@@ -59,7 +59,7 @@
 				
 				<option value="file1">gomux_gorm/src/session_module/application/usecases/session_usecase.go (100.0%)</option>
 				
-				<option value="file2">gomux_gorm/src/signin_module/application/usecases/signin_usecase.go (81.8%)</option>
+				<option value="file2">gomux_gorm/src/signin_module/application/usecases/signin_usecase.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -228,13 +228,13 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error <span
 
         userAlreadyRegistered := (*u.userRepository).FindByEmail(user.Email)
 
-        if userAlreadyRegistered.ID != 0 </span><span class="cov0" title="0">{
+        if userAlreadyRegistered.ID != 0 </span><span class="cov8" title="1">{
                 return &amp;core.ConflictError{}
         }</span>
 
         <span class="cov8" title="1">hashPassword, err := (*u.crypto).HashPassword(user.Password)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return &amp;core.UnauthorizedError{}
         }</span>
         <span class="cov8" title="1">user.Password = hashPassword
