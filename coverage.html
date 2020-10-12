@@ -57,7 +57,7 @@
 				
 				<option value="file0">gomux_gorm/src/auth_module/application/usecases/auth_usecase.go (100.0%)</option>
 				
-				<option value="file1">gomux_gorm/src/session_module/application/usecases/session_usecase.go (17.4%)</option>
+				<option value="file1">gomux_gorm/src/session_module/application/usecases/session_usecase.go (100.0%)</option>
 				
 				<option value="file2">gomux_gorm/src/signin_module/application/usecases/signin_usecase.go (81.8%)</option>
 				
@@ -152,33 +152,33 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
                 return nil, &amp;core.NotFoundError{}
         }</span>
 
-        <span class="cov0" title="0">check := (*u.crypto).CheckPasswordHash(userInput.Password, user.Password)
-        if !check </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">check := (*u.crypto).CheckPasswordHash(userInput.Password, user.Password)
+        if !check </span><span class="cov8" title="1">{
                 return nil, &amp;core.UnauthorizedError{}
         }</span>
 
-        <span class="cov0" title="0">userPermissions := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
+        <span class="cov8" title="1">userPermissions := (*u.usersPermissionsRepository).FindUserPermissions(user.ID)
 
         var userPermissionID *int64
 
         var err error = nil
-        for _, element := range *userPermissions </span><span class="cov0" title="0">{
-                if element.PermissionID == 0 || element.PermissionID == 1 </span><span class="cov0" title="0">{
+        for _, element := range *userPermissions </span><span class="cov8" title="1">{
+                if element.PermissionID == 0 || element.PermissionID == 1 </span><span class="cov8" title="1">{
                         err = &amp;core.ForbiddenError{}
                         break</span>
                 }
-                <span class="cov0" title="0">userPermissionID = &amp;element.PermissionID</span>
+                <span class="cov8" title="1">userPermissionID = &amp;element.PermissionID</span>
         }
 
-        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">token, err := (*u.token).CreateToken(&amp;user.ID, userPermissionID)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">token, err := (*u.token).CreateToken(&amp;user.ID, userPermissionID)
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, &amp;core.InternalServerError{}
         }</span>
-        <span class="cov0" title="0">session.AccessToken = token
+        <span class="cov8" title="1">session.AccessToken = token
 
         (*u.sessionRepository).Create(session, user)
 
