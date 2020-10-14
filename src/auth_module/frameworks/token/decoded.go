@@ -14,7 +14,6 @@ import (
 type IDecodedToken interface {
 	Decoded(t string) (*bussiness.TokenDecodedEntity, error)
 }
-
 type decodedToken struct{}
 
 // VerifyToken ...

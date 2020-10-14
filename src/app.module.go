@@ -45,7 +45,8 @@ type IHttpServer interface {
 func (m *module) StartHTTPServer() {
 	const PORT string = ":4000"
 
-	conn := coreDatabase.ConnectToDatabase()
+	database := coreDatabase.DataBase()
+	conn := database.Connect()
 	defer conn.Close()
 
 	m.conn = conn

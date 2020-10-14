@@ -7,8 +7,15 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres" //
 )
 
+// IDataBase ...
+type IDataBase interface {
+	Connect() *gorm.DB
+}
+
+type dataBase struct{}
+
 // ConnectToDatabase ...
-func ConnectToDatabase() *gorm.DB {
+func (*dataBase) Connect() *gorm.DB {
 	connection, err := gorm.Open("postgres", "user=postgres password=12345 dbname=default sslmode=disable")
 
 	if err != nil {
@@ -22,4 +29,9 @@ func ConnectToDatabase() *gorm.DB {
 	}
 
 	return connection
+}
+
+// DataBase ...
+func DataBase() IDataBase {
+	return &dataBase{}
 }
