@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Get all Staged files
+STAGED_GO_FILES=$(git diff --cached --name-only | grep ".go$")
+
+# If dont have any staged files skip
+if [ "$STAGED_GO_FILES" = "" ]; 
+then
+    exit 0
+fi
+
+PASS=true
+
+# Run to all staged files
+for FILE in $STAGED_GO_FILES
+do
+  
+  # fix goimports
+  ~/.asdf/installs/golang/1.15.2/packages/bin/goimports -w $FILE
+
+  # check lint statmets
+  ~/.asdf/installs/golang/1.15.2/packages/bin/golint "-set_exit_status" $FILE
+  if [ $? -eq 1 ] # -eq -> equal statment
+  then
+      PASS=false
+  fi
+
+  # check lint statmets
+  go vet $FILE
+  if [ $? -ne 0 ];  # -ne -> not equal statment
+  then
+      PASS=false
+  fi
+
+  # run all test and test cov
+  go test ./src/... -cover -coverprofile=c.out && go tool cover -html=c.out -o coverage.html
+  if [ $? -eq 1 ] # -eq -> equal statment
+  then
+      PASS=false
+  fi
+
+done
+
+if ! $PASS; then
+  printf "\033[0;30m\033[41mCOMMIT FAILED\033[0m\n"
+  exit 1
+else
+  printf "\033[0;30m\033[42mCOMMIT SUCCEEDED\033[0m\n"
+fi
+exit 0
