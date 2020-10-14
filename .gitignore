@@ -1,2 +1,4 @@
 src/__debug_bin
 src/app.module
+coverage.html
+c.out

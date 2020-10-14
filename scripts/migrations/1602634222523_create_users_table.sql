@@ -1,0 +1,11 @@
+CREATE TABLE users 
+	( 
+		id SERIAL NOT NULL PRIMARY KEY, 
+		name varchar(255) NOT NULL,
+		last_name varchar(255) NOT NULL,
+		email varchar(255) NOT NULL,
+		password varchar(255) NOT NULL,
+		created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		deleted_at TIMESTAMP WITH TIME ZONE
+	);

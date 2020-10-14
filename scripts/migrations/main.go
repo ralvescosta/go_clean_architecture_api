@@ -83,7 +83,7 @@ func main() {
 					created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 					updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 					deleted_at TIMESTAMP WITH TIME ZONE
-				)
+				);
 		`)
 	fmt.Println("All Done...")
 }
