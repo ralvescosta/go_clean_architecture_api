@@ -9,13 +9,9 @@ PASS=true
 
 for FILE in $STAGED_GO_FILES
 do
-    goimports -w $FILE
+    go test ./src/... -cover -coverprofile=c.out && go tool cover -html=c.out -o coverage.html
 
-    go vet $FILE
-    if [[ $? != 0]]; then
-        PASS=false
-    fi
-    
+    ~/.asdf/installs/golang/1.15.2/packages/bin/mockgen -w $FILE
 done
 
 if ! $PASS; then
