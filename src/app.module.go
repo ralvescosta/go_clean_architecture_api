@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 
 	coreDatabase "gomux_gorm/src/core_module/frameworks/database"
 	coreMiddleware "gomux_gorm/src/core_module/interfaces"
@@ -76,7 +76,10 @@ func (m *module) registerRouters(router *mux.Router) {
 		fmt.Fprint(res, "{\"status\": \"ok\"}")
 	})
 
-	_signinCrypto := signinCrypto.Hash()
+	_bcrypt := &signinCrypto.BcryptStruct{
+		GenerateFromPassword: bcrypt.GenerateFromPassword,
+	}
+	_signinCrypto := signinCrypto.Hash(_bcrypt)
 	_signinUserRepository := signinRepositories.UserRepository(m.conn)
 	_signinUsersPermissionsRepository := signinRepositories.UsersPermissionsRepository(m.conn)
 	_signinUsecase := signinUsecases.SigninUsecase(&_signinUserRepository, &_signinUsersPermissionsRepository, &_signinCrypto)
