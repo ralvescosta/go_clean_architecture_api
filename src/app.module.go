@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -90,7 +92,10 @@ func (m *module) registerRouters(router *mux.Router) {
 	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
 	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
 
-	_authToken := authToken.DecodedToken()
+	_jwt := &authToken.JwtStruct{
+		Parse: jwt.Parse,
+	}
+	_authToken := authToken.DecodedToken(_jwt)
 	_authUserRepository := authRepositories.UserRepository(m.conn)
 	_authPermissionRepository := authRepositories.PermissionRepository(m.conn)
 	_authUsecase := authUsecases.AuthUsecase(&_authToken, &_authUserRepository, &_authPermissionRepository)
