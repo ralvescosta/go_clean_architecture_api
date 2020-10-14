@@ -63,7 +63,7 @@ func (m *module) StartHTTPServer() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Println("Server Was Listening on asasas port  : asasasas", PORT)
+	log.Println("Server Listening on port  : asasasas", PORT)
 	log.Fatalln(srv.ListenAndServe())
 }
 
