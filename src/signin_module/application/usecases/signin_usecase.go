@@ -18,7 +18,7 @@ type ISigninUsecase interface {
 	SigninUsecase(user *bussiness.RegisterUsersEntity) error
 }
 
-// SigninUsecase ...
+// SigninUsecase ......
 func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 
 	userAlreadyRegistered := (*u.userRepository).FindByEmail(user.Email)
