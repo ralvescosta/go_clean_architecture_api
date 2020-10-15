@@ -14,7 +14,6 @@ PASS=true
 # Run to all staged files
 for FILE in $STAGED_GO_FILES
 do
-  
   # fix goimports
   ~/.asdf/installs/golang/1.15.2/packages/bin/goimports -w $FILE
 
@@ -31,15 +30,14 @@ do
   then
       PASS=false
   fi
-
-  # run all test and test cov
-  go test ./src/... -cover -coverprofile=c.out && go tool cover -html=c.out -o coverage.html
-  if [ $? -eq 1 ] # -eq -> equal statment
-  then
-      PASS=false
-  fi
-
 done
+
+# run all test and test cov
+go test ./src/... -cover -coverprofile=c.out && go tool cover -html=c.out -o coverage.html
+if [ $? -eq 1 ] # -eq -> equal statment
+then
+  PASS=false
+fi
 
 if ! $PASS; then
   printf "\033[0;30m\033[41mCOMMIT FAILED\033[0m\n"
