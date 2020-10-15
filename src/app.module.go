@@ -76,18 +76,26 @@ func (m *module) registerRouters(router *mux.Router) {
 		fmt.Fprint(res, "{\"status\": \"ok\"}")
 	})
 
-	_bcrypt := &signinCrypto.BcryptStruct{
+	_bcryptHasher := &signinCrypto.BcryptStruct{
 		GenerateFromPassword: bcrypt.GenerateFromPassword,
 	}
-	_signinCrypto := signinCrypto.Hash(_bcrypt)
+	_signinCrypto := signinCrypto.Hash(_bcryptHasher)
 	_signinUserRepository := signinRepositories.UserRepository(m.conn)
 	_signinUsersPermissionsRepository := signinRepositories.UsersPermissionsRepository(m.conn)
 	_signinUsecase := signinUsecases.SigninUsecase(&_signinUserRepository, &_signinUsersPermissionsRepository, &_signinCrypto)
 	_signinController := signinControllers.SigninController(&_signinUsecase)
 	router.HandleFunc("/signin", _signinController.Handle).Methods("POST")
 
-	_sessionCrypto := sessionCrypto.Hash()
-	_sessionCreateToken := sessionToken.CreateToken()
+	_bcryptCompare := &sessionCrypto.BcryptStruct{
+		CompareHashAndPassword: bcrypt.CompareHashAndPassword,
+	}
+	_tokenCreate := &sessionToken.JwtStruct{
+		MapClaims:          jwt.MapClaims{},
+		NewWithClaims:      jwt.NewWithClaims,
+		SigningMethodHS256: jwt.SigningMethodHS256,
+	}
+	_sessionCrypto := sessionCrypto.Hash(_bcryptCompare)
+	_sessionCreateToken := sessionToken.CreateToken(_tokenCreate)
 	_sessionUserRepository := sessionRepositories.UserRepository(m.conn)
 	_sessionSessionRepository := sessionRepositories.SessionRepository(m.conn)
 	_sessionUsersPermissionsRepository := sessionRepositories.UsersPermissionsRepository(m.conn)
@@ -95,10 +103,10 @@ func (m *module) registerRouters(router *mux.Router) {
 	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
 	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
 
-	_jwt := &authToken.JwtStruct{
+	_jwtDecoded := &authToken.JwtStruct{
 		Parse: jwt.Parse,
 	}
-	_authToken := authToken.DecodedToken(_jwt)
+	_authToken := authToken.DecodedToken(_jwtDecoded)
 	_authUserRepository := authRepositories.UserRepository(m.conn)
 	_authPermissionRepository := authRepositories.PermissionRepository(m.conn)
 	_authUsecase := authUsecases.AuthUsecase(&_authToken, &_authUserRepository, &_authPermissionRepository)
