@@ -10,31 +10,12 @@ import (
 	bussiness "gomux_gorm/src/auth_module/bussiness/entities"
 )
 
-/**/
-// JwtInterface ...
-type JwtInterface interface {
-	Parse(tokenString string, keyFunc jwt.Keyfunc) (*jwt.Token, error)
-}
-
-// JwtStruct ...
-type JwtStruct struct {
-	Parse func(tokenString string, keyFunc jwt.Keyfunc) (*jwt.Token, error)
-}
-
-/**/
-
-// IDecodedToken ...
-type IDecodedToken interface {
-	Decoded(t string) (*bussiness.TokenDecodedEntity, error)
-}
-type decodedToken struct {
-	jwt *JwtStruct
-}
+type decodedToken struct{}
 
 // VerifyToken ...
 func (j *decodedToken) Decoded(t string) (*bussiness.TokenDecodedEntity, error) {
 
-	token, err := (*j.jwt).Parse(t, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -65,6 +46,6 @@ func (j *decodedToken) Decoded(t string) (*bussiness.TokenDecodedEntity, error) 
 }
 
 // DecodedToken ...
-func DecodedToken(jwt *JwtStruct) IDecodedToken {
-	return &decodedToken{jwt}
+func DecodedToken() IDecodedToken {
+	return &decodedToken{}
 }

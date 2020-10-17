@@ -1,115 +1,103 @@
 package authapplicationusecases
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
+	test "gomux_gorm/src/auth_module/application/__test__"
 	bussiness "gomux_gorm/src/auth_module/bussiness/entities"
-	repositories "gomux_gorm/src/auth_module/frameworks/repositories"
-	token "gomux_gorm/src/auth_module/frameworks/token"
-	core "gomux_gorm/src/core_module/bussiness/errors"
 	tables "gomux_gorm/src/core_module/frameworks/database/table_models"
 )
 
-/*
-* UserRepositorySpy
- */
-type userRepositoryStructSpy struct {
-	res *tables.Users
+type mockedStruct struct {
+	decodedTokenSpy         *test.DecodedTokenSpy
+	userRepositorySpy       *test.UserRepositorySpy
+	permissionRepositorySpy *test.PermissionRepositorySpy
+	mockTokenDecoded        *bussiness.TokenDecodedEntity
+	mockUser                *tables.Users
+	mockPermission          *tables.Permissions
+	mockAuthenticatedUser   *bussiness.AuthenticatedUser
 }
 
-func (*userRepositoryStructSpy) FindByID(id int64) *tables.Users {
-	return &tables.Users{}
+func makeMocks() *mockedStruct {
+	a := &test.DecodedTokenSpy{}
+	b := &test.UserRepositorySpy{}
+	c := &test.PermissionRepositorySpy{}
+
+	mockUser := &tables.Users{
+		ID:       1,
+		Name:     "name",
+		LastName: "last",
+		Email:    "email",
+		Password: "password",
+	}
+
+	mockPermission := &tables.Permissions{
+		ID:   2,
+		Role: "user",
+	}
+
+	mockTokenDecoded := &bussiness.TokenDecodedEntity{
+		UserID:       mockUser.ID,
+		PermissionID: mockPermission.ID,
+	}
+
+	mockAuthenticatedUser := &bussiness.AuthenticatedUser{
+		ID:           1,
+		Name:         mockUser.Name,
+		Email:        mockUser.Email,
+		PermissionID: mockPermission.ID,
+	}
+
+	return &mockedStruct{
+		decodedTokenSpy:         a,
+		userRepositorySpy:       b,
+		permissionRepositorySpy: c,
+		mockTokenDecoded:        mockTokenDecoded,
+		mockUser:                mockUser,
+		mockPermission:          mockPermission,
+		mockAuthenticatedUser:   mockAuthenticatedUser,
+	}
 }
-func UserRepositorySpy(userRepoRes *tables.Users) repositories.IUserRepository {
-	return &userRepositoryStructSpy{res: userRepoRes}
-}
-
-/**/
-
-/*
-* PermissionRepositorySpy
- */
-type permissionRepositoryStructSpy struct {
-	res *tables.Permissions
-}
-
-func (p *permissionRepositoryStructSpy) FindByID(id int64) *tables.Permissions {
-	return p.res
-}
-func PermissionRepositorySpy(permissionRepoRes *tables.Permissions) repositories.IPermissionRepository {
-	return &permissionRepositoryStructSpy{res: permissionRepoRes}
-}
-
-/**/
-
-/*
-* DecodedTokenSpy
- */
-type decodedTokenStructSpy struct {
-	err error
-}
-
-func (d *decodedTokenStructSpy) Decoded(t string) (*bussiness.TokenDecodedEntity, error) {
-	return &bussiness.TokenDecodedEntity{}, d.err
-}
-func DecodedTokenSpy(decodedTokenErr error) token.IDecodedToken {
-	return &decodedTokenStructSpy{err: decodedTokenErr}
-}
-
-/**/
-
-/*
-* MAKE SUT
- */
-func makeSut(userRepoRes *tables.Users, permissionRepoRes *tables.Permissions, decodedTokenErr error) IAuthUsecase {
-	userRepositorySpy := UserRepositorySpy(userRepoRes)
-	permissionRepositorySpy := PermissionRepositorySpy(permissionRepoRes)
-	decodedTokenSpy := DecodedTokenSpy(decodedTokenErr)
-
-	sut := AuthUsecase(&decodedTokenSpy, &userRepositorySpy, &permissionRepositorySpy)
-
-	return sut
-}
-
-/**/
 
 func TestAuthUsecase(t *testing.T) {
-	sut := makeSut(&tables.Users{}, &tables.Permissions{}, nil)
+	mocks := makeMocks()
 
-	_, err := sut.Auth("", "")
+	mocks.decodedTokenSpy.On("Decoded", "some token").Return(mocks.mockTokenDecoded, nil)
+	mocks.userRepositorySpy.On("FindByID", mocks.mockUser.ID).Return(mocks.mockUser)
+	mocks.permissionRepositorySpy.On("FindByID", mocks.mockPermission.ID).Return(mocks.mockPermission)
 
-	if err != nil {
-		t.Errorf("AuthUsecase() wrong statement")
-	}
+	sut := AuthUsecase(mocks.decodedTokenSpy, mocks.userRepositorySpy, mocks.permissionRepositorySpy)
+
+	result, _ := sut.Auth("some token", "user")
+
+	assert.Equal(t, mocks.mockAuthenticatedUser, result, "Auth()")
 }
 
-func TestShouldReturnTokenExpiredErrorIfTokenDecodedRetornError(t *testing.T) {
-	sut := makeSut(&tables.Users{}, &tables.Permissions{}, &core.TokenExpiredError{})
+func TestTokenExpiredError(t *testing.T) {
+	mocks := makeMocks()
 
-	_, err := sut.Auth("", "")
-	fmt.Println(err)
+	mocks.decodedTokenSpy.On("Decoded", "some token").Return(&bussiness.TokenDecodedEntity{}, errors.New("Expired"))
+	mocks.userRepositorySpy.On("FindByID", mocks.mockUser.ID).Return(mocks.mockUser)
+	mocks.permissionRepositorySpy.On("FindByID", mocks.mockPermission.ID).Return(mocks.mockPermission)
 
-	if err.Error() != "Something went wrong with the  request. Server returned 401 status." {
-		t.Errorf("DecodedToken Unexpected Response")
-	}
+	sut := AuthUsecase(mocks.decodedTokenSpy, mocks.userRepositorySpy, mocks.permissionRepositorySpy)
+
+	_, err := sut.Auth("some token", "user")
+	assert.Equal(t, "Something went wrong with the  request. Server returned 401 status.", err.Error(), "Should ReturnToken Expired Error If Token Decoded Return Error")
 }
 
-func TestShouldReturnPermissionNotAllowedErrorIfUserRoleNotAllowed(t *testing.T) {
-	sut := makeSut(
-		&tables.Users{},
-		&tables.Permissions{
-			ID:          1,
-			Role:        "user",
-			Description: "",
-		},
-		nil,
-	)
+func TestPermissionNotAllowedError(t *testing.T) {
+	mocks := makeMocks()
 
-	_, err := sut.Auth("", "admin")
+	mocks.decodedTokenSpy.On("Decoded", "some token").Return(mocks.mockTokenDecoded, nil)
+	mocks.userRepositorySpy.On("FindByID", mocks.mockUser.ID).Return(mocks.mockUser)
+	mocks.permissionRepositorySpy.On("FindByID", mocks.mockPermission.ID).Return(mocks.mockPermission)
 
-	if err.Error() != "Something went wrong with the  request. Server returned 401 status." {
-		t.Errorf("AuthUsecase role match Unexpected Response")
-	}
+	sut := AuthUsecase(mocks.decodedTokenSpy, mocks.userRepositorySpy, mocks.permissionRepositorySpy)
 
+	_, err := sut.Auth("some token", "admin")
+	assert.Equal(t, "Something went wrong with the  request. Server returned 401 status.", err.Error(), "Should Return Permission Not Allowed Error If User Role Not Allowed")
 }

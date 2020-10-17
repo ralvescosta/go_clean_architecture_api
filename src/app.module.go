@@ -103,14 +103,11 @@ func (m *module) registerRouters(router *mux.Router) {
 	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
 	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
 
-	_jwtDecoded := &authToken.JwtStruct{
-		Parse: jwt.Parse,
-	}
-	_authToken := authToken.DecodedToken(_jwtDecoded)
+	_authToken := authToken.DecodedToken()
 	_authUserRepository := authRepositories.UserRepository(m.conn)
 	_authPermissionRepository := authRepositories.PermissionRepository(m.conn)
-	_authUsecase := authUsecases.AuthUsecase(&_authToken, &_authUserRepository, &_authPermissionRepository)
-	_authMiddleware := authMiddleware.AuthMiddleware(&_authUsecase)
+	_authUsecase := authUsecases.AuthUsecase(_authToken, _authUserRepository, _authPermissionRepository)
+	_authMiddleware := authMiddleware.AuthMiddleware(_authUsecase)
 
 	_booksController := booksControllers.BooksController()
 	booksGroup := router.PathPrefix("/books").Subrouter()

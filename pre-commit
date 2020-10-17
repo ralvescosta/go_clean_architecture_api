@@ -15,10 +15,10 @@ PASS=true
 for FILE in $STAGED_GO_FILES
 do
   # fix goimports
-  ~/.asdf/installs/golang/1.15.2/packages/bin/goimports -w $FILE
+  ~/.asdf/installs/golang/1.15.3/packages/bin/goimports -w $FILE
 
   # check lint statmets
-  ~/.asdf/installs/golang/1.15.2/packages/bin/golint "-set_exit_status" $FILE
+  ~/.asdf/installs/golang/1.15.3/packages/bin/golint "-set_exit_status" $FILE
   if [ $? -eq 1 ] # -eq -> equal statment
   then
       PASS=false

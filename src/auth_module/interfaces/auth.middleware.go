@@ -58,6 +58,6 @@ func (m *middleware) Auth(role string) func(next http.Handler) http.Handler {
 }
 
 // AuthMiddleware ...
-func AuthMiddleware(usecase *usecases.IAuthUsecase) IAuthMiddleware {
-	return &middleware{usecase}
+func AuthMiddleware(usecase usecases.IAuthUsecase) IAuthMiddleware {
+	return &middleware{&usecase}
 }

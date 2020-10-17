@@ -13,11 +13,6 @@ type authUsecase struct {
 	permissionRepository *repositories.IPermissionRepository
 }
 
-// IAuthUsecase ...
-type IAuthUsecase interface {
-	Auth(token string, role string) (*bussiness.AuthenticatedUser, error)
-}
-
 //Auth ..
 func (u *authUsecase) Auth(token string, role string) (*bussiness.AuthenticatedUser, error) {
 
@@ -42,6 +37,6 @@ func (u *authUsecase) Auth(token string, role string) (*bussiness.AuthenticatedU
 }
 
 // AuthUsecase ...
-func AuthUsecase(token *token.IDecodedToken, userRepository *repositories.IUserRepository, permissionRepository *repositories.IPermissionRepository) IAuthUsecase {
-	return &authUsecase{token, userRepository, permissionRepository}
+func AuthUsecase(token token.IDecodedToken, userRepository repositories.IUserRepository, permissionRepository repositories.IPermissionRepository) IAuthUsecase {
+	return &authUsecase{&token, &userRepository, &permissionRepository}
 }
