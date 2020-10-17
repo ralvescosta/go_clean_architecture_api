@@ -99,7 +99,7 @@ func (m *module) registerRouters(router *mux.Router) {
 	_sessionUserRepository := sessionRepositories.UserRepository(m.conn)
 	_sessionSessionRepository := sessionRepositories.SessionRepository(m.conn)
 	_sessionUsersPermissionsRepository := sessionRepositories.UsersPermissionsRepository(m.conn)
-	_sessionUsecase := sessionUsecases.SessionUsecase(&_sessionUserRepository, &_sessionSessionRepository, &_sessionUsersPermissionsRepository, &_sessionCrypto, &_sessionCreateToken)
+	_sessionUsecase := sessionUsecases.SessionUsecase(_sessionUserRepository, _sessionSessionRepository, _sessionUsersPermissionsRepository, _sessionCrypto, _sessionCreateToken)
 	_sessionController := sessionControllers.SessionController(&_sessionUsecase)
 	router.HandleFunc("/session", _sessionController.Handle).Methods("POST")
 

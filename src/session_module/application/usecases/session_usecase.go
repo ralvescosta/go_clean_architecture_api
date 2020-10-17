@@ -16,11 +16,6 @@ type usecase struct {
 	token                      *token.ICreateToken
 }
 
-// ISessionUsecase ...
-type ISessionUsecase interface {
-	SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error)
-}
-
 // SessionUsecase ...
 func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussiness.SessionEntity) (*bussiness.UserSessionEntity, error) {
 	user := (*u.userRepository).FindByEmail(userInput.Email)
@@ -69,11 +64,11 @@ func (u *usecase) SessionUsecase(userInput *bussiness.UsersInput, session *bussi
 
 // SessionUsecase ...
 func SessionUsecase(
-	userRepository *repositories.IUserRepository,
-	sessionRepository *repositories.ISessionRepository,
-	usersPermissionsRepository *repositories.IUsersPermissionsRepository,
-	crypto *crypto.IHasher,
-	token *token.ICreateToken,
+	userRepository repositories.IUserRepository,
+	sessionRepository repositories.ISessionRepository,
+	usersPermissionsRepository repositories.IUsersPermissionsRepository,
+	crypto crypto.IHasher,
+	token token.ICreateToken,
 ) ISessionUsecase {
-	return &usecase{userRepository, sessionRepository, usersPermissionsRepository, crypto, token}
+	return &usecase{&userRepository, &sessionRepository, &usersPermissionsRepository, &crypto, &token}
 }

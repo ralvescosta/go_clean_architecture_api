@@ -5,202 +5,170 @@ import (
 	"testing"
 
 	tables "gomux_gorm/src/core_module/frameworks/database/table_models"
+	test "gomux_gorm/src/session_module/application/__test__"
 	bussiness "gomux_gorm/src/session_module/bussiness/entities"
-	crypto "gomux_gorm/src/session_module/frameworks/crypto"
-	repositories "gomux_gorm/src/session_module/frameworks/repositories"
-	token "gomux_gorm/src/session_module/frameworks/token"
+
+	"github.com/stretchr/testify/assert"
 )
 
-/*
-* UserRepositorySpy
- */
-type userRepositoryStructSpy struct {
-	res *tables.Users
+type mockedStruct struct {
+	userRepositorySpy             *test.UserRepositorySpy
+	sessionRepositorySpy          *test.SessionRepositorySpy
+	usersPermissionsRepositorySpy *test.UsersPermissionsRepositorySpy
+	hasherSpy                     *test.HasherSpy
+	tokenSpy                      *test.CreateTokenSpy
+	mockUser                      *tables.Users
+	mockSessionEntity             *bussiness.SessionEntity
+	mockPermission                *tables.Permissions
+	mockUsersPermissions          *[]tables.UsersPermissions
+	mockUsersInput                *bussiness.UsersInput
+	mockUserSessionEntity         *bussiness.UserSessionEntity
 }
 
-func (u *userRepositoryStructSpy) FindByEmail(email string) *tables.Users {
-	return u.res
-}
-func UserRepositorySpy(userRepoRes *tables.Users) repositories.IUserRepository {
-	return &userRepositoryStructSpy{res: userRepoRes}
-}
+func makeMocks() *mockedStruct {
+	userRepositorySpy := &test.UserRepositorySpy{}
+	sessionRepositorySpy := &test.SessionRepositorySpy{}
+	usersPermissionsRepositorySpy := &test.UsersPermissionsRepositorySpy{}
+	hasherSpy := &test.HasherSpy{}
+	tokenSpy := &test.CreateTokenSpy{}
 
-/**/
+	mockUser := &tables.Users{
+		ID:       1,
+		Name:     "name",
+		LastName: "last",
+		Email:    "email",
+		Password: "password",
+	}
 
-/*
-* SessionRepositorySpy
- */
-type sessionRepositoryStructSpy struct{}
+	mockSessionEntity := &bussiness.SessionEntity{
+		Agent:         "agent",
+		LocalAddress:  "local",
+		LocalPort:     "port",
+		RemoteAddress: "remote",
+		AccessToken:   "some token",
+	}
 
-func (*sessionRepositoryStructSpy) Create(session *bussiness.SessionEntity, user *tables.Users) {}
-func SessionRepositorySpy() repositories.ISessionRepository {
-	return &sessionRepositoryStructSpy{}
-}
+	mockPermission := &tables.Permissions{
+		ID:   2,
+		Role: "user",
+	}
 
-/**/
+	mockUsersPermissions := &[]tables.UsersPermissions{
+		tables.UsersPermissions{
+			ID:             1,
+			UserID:         mockUser.ID,
+			UserName:       mockUser.Name,
+			UserEmail:      mockUser.Email,
+			PermissionID:   mockPermission.ID,
+			PermissionRole: mockPermission.Role,
+		},
+	}
 
-/*
-* UsersPermissionsRepositorySpy
- */
-type usersPermissionsRepositoryStructSpy struct {
-	res *[]tables.UsersPermissions
-}
+	mockUsersInput := &bussiness.UsersInput{
+		Email:    mockUser.Email,
+		Password: "123",
+	}
 
-func (u *usersPermissionsRepositoryStructSpy) FindUserPermissions(userID int64) *[]tables.UsersPermissions {
-	return u.res
-}
-func UsersPermissionsRepositorySpy(usersPermissionRepoRes *[]tables.UsersPermissions) repositories.IUsersPermissionsRepository {
-	return &usersPermissionsRepositoryStructSpy{res: usersPermissionRepoRes}
-}
+	mockUserSessionEntity := &bussiness.UserSessionEntity{
+		AccessToken: mockSessionEntity.AccessToken,
+		Name:        mockUser.Name,
+		LastName:    mockUser.LastName,
+		Email:       mockUser.Email,
+	}
 
-/**/
-
-/*
-* HasherSpy
- */
-type hasherStructSpy struct {
-	res bool
-}
-
-func (h *hasherStructSpy) CheckPasswordHash(password, hash string) bool {
-	return h.res
-}
-func HasherSpy(cryptoRes bool) crypto.IHasher {
-	return &hasherStructSpy{res: cryptoRes}
-}
-
-/**/
-
-/*
-* CreateTokenSpy
- */
-type createTokenStructSpy struct {
-	res string
-	err error
-}
-
-func (c *createTokenStructSpy) CreateToken(userID *int64, permissionID *int64) (string, error) {
-	return c.res, c.err
-}
-func CreateTokenSpy(createTokenRes string, createToken error) token.ICreateToken {
-	return &createTokenStructSpy{res: createTokenRes, err: createToken}
-}
-
-/**/
-
-/*
-* MAKE SUT
- */
-func makeSut(userRepoRes *tables.Users, usersPermissionRepoRes *[]tables.UsersPermissions, cryptoRes bool, createTokenRes string, createToken error) ISessionUsecase {
-	userRepositorySpy := UserRepositorySpy(userRepoRes)
-	sessionRepositorySpy := SessionRepositorySpy()
-	usersPermissionsRepositorySpy := UsersPermissionsRepositorySpy(usersPermissionRepoRes)
-	cryptoSpy := HasherSpy(cryptoRes)
-	tokenSpy := CreateTokenSpy(createTokenRes, createToken)
-
-	sut := SessionUsecase(&userRepositorySpy, &sessionRepositorySpy, &usersPermissionsRepositorySpy, &cryptoSpy, &tokenSpy)
-
-	return sut
+	return &mockedStruct{
+		userRepositorySpy:             userRepositorySpy,
+		sessionRepositorySpy:          sessionRepositorySpy,
+		usersPermissionsRepositorySpy: usersPermissionsRepositorySpy,
+		hasherSpy:                     hasherSpy,
+		tokenSpy:                      tokenSpy,
+		mockUser:                      mockUser,
+		mockSessionEntity:             mockSessionEntity,
+		mockPermission:                mockPermission,
+		mockUsersPermissions:          mockUsersPermissions,
+		mockUsersInput:                mockUsersInput,
+		mockUserSessionEntity:         mockUserSessionEntity,
+	}
 }
 
 /**/
 
 func TestSessionUsecase(t *testing.T) {
-	sut := makeSut(
-		&tables.Users{
-			ID: 1,
-		},
-		&[]tables.UsersPermissions{
-			tables.UsersPermissions{
-				PermissionID: 2,
-			},
-		},
-		true,
-		"",
-		nil,
-	)
+	mocks := makeMocks()
 
-	_, err := sut.SessionUsecase(&bussiness.UsersInput{}, &bussiness.SessionEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(mocks.mockUser)
+	mocks.sessionRepositorySpy.On("Create", mocks.mockSessionEntity, mocks.mockUser)
+	mocks.usersPermissionsRepositorySpy.On("FindUserPermissions", mocks.mockUser.ID).Return(mocks.mockUsersPermissions)
+	mocks.hasherSpy.On("CheckPasswordHash", "123", mocks.mockUser.Password).Return(true)
+	mocks.tokenSpy.On("CreateToken", &mocks.mockUser.ID, &mocks.mockPermission.ID).Return(mocks.mockSessionEntity.AccessToken, nil)
 
-	if err != nil {
-		t.Skipf("SessionUsecase()")
-	}
+	sut := SessionUsecase(mocks.userRepositorySpy, mocks.sessionRepositorySpy, mocks.usersPermissionsRepositorySpy, mocks.hasherSpy, mocks.tokenSpy)
+
+	result, _ := sut.SessionUsecase(mocks.mockUsersInput, mocks.mockSessionEntity)
+
+	assert.Equal(t, mocks.mockUserSessionEntity, result, "SessionUsecase()")
 }
 
-func TestShouldReturnNotFoundErrorIfUserEmailNotRegistered(t *testing.T) {
-	sut := makeSut(
-		&tables.Users{},
-		&[]tables.UsersPermissions{},
-		true,
-		"",
-		nil,
-	)
+func TestNotFoundError(t *testing.T) {
+	mocks := makeMocks()
 
-	_, err := sut.SessionUsecase(&bussiness.UsersInput{}, &bussiness.SessionEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(&tables.Users{})
+	mocks.sessionRepositorySpy.On("Create", mocks.mockSessionEntity, mocks.mockUser)
+	mocks.usersPermissionsRepositorySpy.On("FindUserPermissions", mocks.mockUser.ID).Return(mocks.mockUsersPermissions)
+	mocks.hasherSpy.On("CheckPasswordHash", "123", mocks.mockUser.Password).Return(true)
+	mocks.tokenSpy.On("CreateToken", &mocks.mockUser.ID, &mocks.mockPermission.ID).Return(mocks.mockSessionEntity.AccessToken, nil)
 
-	if err.Error() != "Something went wrong with the  request. Server returned 404 status." {
-		t.Errorf("SessionUsecase, check if user exist, Unexpected Response")
-	}
+	sut := SessionUsecase(mocks.userRepositorySpy, mocks.sessionRepositorySpy, mocks.usersPermissionsRepositorySpy, mocks.hasherSpy, mocks.tokenSpy)
+
+	_, err := sut.SessionUsecase(mocks.mockUsersInput, mocks.mockSessionEntity)
+
+	assert.Equal(t, "Something went wrong with the  request. Server returned 404 status.", err.Error(), "Should Return Not Found Error If User Email Not Registered")
 }
 
-func TestShouldReturnUnauthorizedErrorIfCheckPasswordHashReturnsFalse(t *testing.T) {
-	sut := makeSut(
-		&tables.Users{
-			ID: 1,
-		},
-		&[]tables.UsersPermissions{},
-		false,
-		"",
-		nil,
-	)
+func TestUnauthorizedError1(t *testing.T) {
+	mocks := makeMocks()
 
-	_, err := sut.SessionUsecase(&bussiness.UsersInput{}, &bussiness.SessionEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(mocks.mockUser)
+	mocks.sessionRepositorySpy.On("Create", mocks.mockSessionEntity, mocks.mockUser)
+	mocks.usersPermissionsRepositorySpy.On("FindUserPermissions", mocks.mockUser.ID).Return(mocks.mockUsersPermissions)
+	mocks.hasherSpy.On("CheckPasswordHash", "123", mocks.mockUser.Password).Return(false)
+	mocks.tokenSpy.On("CreateToken", &mocks.mockUser.ID, &mocks.mockPermission.ID).Return(mocks.mockSessionEntity.AccessToken, nil)
 
-	if err.Error() != "Something went wrong with the  request. Server returned 401 status." {
-		t.Errorf("SessionUsecase, check if user password hash is valid, Unexpected Response")
-	}
+	sut := SessionUsecase(mocks.userRepositorySpy, mocks.sessionRepositorySpy, mocks.usersPermissionsRepositorySpy, mocks.hasherSpy, mocks.tokenSpy)
+
+	_, err := sut.SessionUsecase(mocks.mockUsersInput, mocks.mockSessionEntity)
+
+	assert.Equal(t, "Something went wrong with the  request. Server returned 401 status.", err.Error(), "Should Return Unauthorized Error If Check Password Hash Returns False")
 }
 
-func TestShouldReturnForbiddenErrorIfUserRoleIsUnauthorized(t *testing.T) {
-	sut := makeSut(
-		&tables.Users{
-			ID: 1,
-		},
-		&[]tables.UsersPermissions{
-			tables.UsersPermissions{
-				PermissionID: 1,
-			},
-		},
-		true,
-		"",
-		nil,
-	)
+func TestUnauthorizedError2(t *testing.T) {
+	mocks := makeMocks()
 
-	_, err := sut.SessionUsecase(&bussiness.UsersInput{}, &bussiness.SessionEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(mocks.mockUser)
+	mocks.sessionRepositorySpy.On("Create", mocks.mockSessionEntity, mocks.mockUser)
+	mocks.usersPermissionsRepositorySpy.On("FindUserPermissions", mocks.mockUser.ID).Return(&[]tables.UsersPermissions{tables.UsersPermissions{UserID: 1, PermissionID: 1, PermissionRole: "unauthorized"}})
+	mocks.hasherSpy.On("CheckPasswordHash", "123", mocks.mockUser.Password).Return(true)
+	mocks.tokenSpy.On("CreateToken", &mocks.mockUser.ID, &mocks.mockPermission.ID).Return(mocks.mockSessionEntity.AccessToken, nil)
 
-	if err.Error() != "Something went wrong with the  request. Server returned 403 status." {
-		t.Errorf("SessionUsecase, check if user password hash is valid, Unexpected Response")
-	}
+	sut := SessionUsecase(mocks.userRepositorySpy, mocks.sessionRepositorySpy, mocks.usersPermissionsRepositorySpy, mocks.hasherSpy, mocks.tokenSpy)
+
+	_, err := sut.SessionUsecase(mocks.mockUsersInput, mocks.mockSessionEntity)
+
+	assert.Equal(t, "Something went wrong with the  request. Server returned 403 status.", err.Error(), "Should Return Unauthorized Error If Check Password Hash Returns False")
 }
 
-func TestReturnInternalServerErrorIfSomeErrorOccurOnCreateToken(t *testing.T) {
-	sut := makeSut(
-		&tables.Users{
-			ID: 1,
-		},
-		&[]tables.UsersPermissions{
-			tables.UsersPermissions{
-				PermissionID: 2,
-			},
-		},
-		true,
-		"",
-		errors.New("some error"),
-	)
+func TestInternalServerError(t *testing.T) {
+	mocks := makeMocks()
 
-	_, err := sut.SessionUsecase(&bussiness.UsersInput{}, &bussiness.SessionEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(mocks.mockUser)
+	mocks.sessionRepositorySpy.On("Create", mocks.mockSessionEntity, mocks.mockUser)
+	mocks.usersPermissionsRepositorySpy.On("FindUserPermissions", mocks.mockUser.ID).Return(mocks.mockUsersPermissions)
+	mocks.hasherSpy.On("CheckPasswordHash", "123", mocks.mockUser.Password).Return(true)
+	mocks.tokenSpy.On("CreateToken", &mocks.mockUser.ID, &mocks.mockPermission.ID).Return(mocks.mockSessionEntity.AccessToken, errors.New("Some Error"))
 
-	if err.Error() != "Something went wrong with the  request. Server returned 500 status." {
-		t.Errorf("SessionUsecase, check if user password hash is valid, Unexpected Response")
-	}
+	sut := SessionUsecase(mocks.userRepositorySpy, mocks.sessionRepositorySpy, mocks.usersPermissionsRepositorySpy, mocks.hasherSpy, mocks.tokenSpy)
+
+	_, err := sut.SessionUsecase(mocks.mockUsersInput, mocks.mockSessionEntity)
+
+	assert.Equal(t, "Something went wrong with the  request. Server returned 500 status.", err.Error(), "Should Return Internal Server Error If Some Error Occur On CreateToken")
 }
