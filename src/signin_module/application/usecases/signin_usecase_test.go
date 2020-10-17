@@ -3,114 +3,115 @@ package signinapplicationusecases
 import (
 	"errors"
 	tables "gomux_gorm/src/core_module/frameworks/database/table_models"
-	bussiness "gomux_gorm/src/signin_module/bussiness/entities"
+	test "gomux_gorm/src/signin_module/application/__test__"
 	entities "gomux_gorm/src/signin_module/bussiness/entities"
-	crypto "gomux_gorm/src/signin_module/frameworks/crypto"
-	repositories "gomux_gorm/src/signin_module/frameworks/repositories"
 
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
-
-/*
-* User Repository Spy
- */
-type userRepositoryStructSpy struct {
-	res *tables.Users
-}
-
-func (u *userRepositoryStructSpy) Create(registerUser *entities.RegisterUsersEntity) *tables.Users {
-	return u.res
-}
-func (u *userRepositoryStructSpy) FindByEmail(email string) *tables.Users {
-	return u.res
-}
-func UserRepositorySpy(userRepoRes *tables.Users) repositories.IUserRepository {
-	return &userRepositoryStructSpy{res: userRepoRes}
-}
-
-/**/
-
-/*
-* Permission Repository Spy
- */
-type userPermissionsRepositoryStructSpy struct {
-	res *tables.UsersPermissions
-}
-
-func (u *userPermissionsRepositoryStructSpy) Create(user *tables.Users, permissionID int64, permission string) *tables.UsersPermissions {
-	return u.res
-}
-func UserPermissionsRepositorySpy(userPermissionRepoRes *tables.UsersPermissions) repositories.IUsersPermissionsRepository {
-	return &userPermissionsRepositoryStructSpy{res: userPermissionRepoRes}
-}
-
-/**/
-
-/*
-* Crypto Spy
- */
-type cryptoStructSpy struct {
-	res string
-	err error
-}
-
-func (c *cryptoStructSpy) HashPassword(password string) (string, error) {
-	return c.res, c.err
-}
-func CryptoSpy(cryptoRes string, cryptoErr error) crypto.IHasher {
-	return &cryptoStructSpy{res: cryptoRes, err: cryptoErr}
-}
-
-/**/
 
 /*
 * MAKE SUT
  */
-func makeSut(userRepoRes *tables.Users, userPermissionRepoRes *tables.UsersPermissions, cryptoRes string, cryptoErr error) ISigninUsecase {
-	userRepositorySpy := UserRepositorySpy(userRepoRes)
-	userPermissionsRepositorySpy := UserPermissionsRepositorySpy(userPermissionRepoRes)
-	cryptoSpy := CryptoSpy(cryptoRes, cryptoErr)
+type mockedStruct struct {
+	userRepositorySpy            *test.UserRepositorySpy
+	userPermissionsRepositorySpy *test.UserPermissionsRepositorySpy
+	cryptoSpy                    *test.CryptoSpy
+	mockUser                     *tables.Users
+	mockPermission               *tables.Permissions
+	mockRegisterUser             *entities.RegisterUsersEntity
+	mockUsersPermissions         *tables.UsersPermissions
+}
 
-	sut := SigninUsecase(&userRepositorySpy, &userPermissionsRepositorySpy, &cryptoSpy)
+func makeMocks() *mockedStruct {
+	userRepositorySpy := &test.UserRepositorySpy{}
+	userPermissionsRepositorySpy := &test.UserPermissionsRepositorySpy{}
+	cryptoSpy := &test.CryptoSpy{}
 
-	return sut
+	mockUser := &tables.Users{
+		ID:       1,
+		Name:     "name",
+		LastName: "last",
+		Email:    "email",
+		Password: "password",
+	}
+
+	mockPermission := &tables.Permissions{
+		ID:   1,
+		Role: "user",
+	}
+
+	mockRegisterUser := &entities.RegisterUsersEntity{
+		Name:     mockUser.Name,
+		LastName: mockUser.LastName,
+		Email:    mockUser.Email,
+		Password: "123",
+	}
+
+	mockUsersPermissions := &tables.UsersPermissions{
+		ID:             1,
+		UserID:         mockUser.ID,
+		UserName:       mockUser.Name,
+		UserEmail:      mockUser.Email,
+		PermissionID:   mockPermission.ID,
+		PermissionRole: mockPermission.Role,
+	}
+
+	return &mockedStruct{
+		userRepositorySpy:            userRepositorySpy,
+		userPermissionsRepositorySpy: userPermissionsRepositorySpy,
+		cryptoSpy:                    cryptoSpy,
+		mockUser:                     mockUser,
+		mockPermission:               mockPermission,
+		mockRegisterUser:             mockRegisterUser,
+		mockUsersPermissions:         mockUsersPermissions,
+	}
 }
 
 /**/
 
 func TestSigninUsecase(t *testing.T) {
-	sut := makeSut(&tables.Users{}, &tables.UsersPermissions{}, "", nil)
+	mocks := makeMocks()
 
-	result := sut.SigninUsecase(&bussiness.RegisterUsersEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(&tables.Users{})
+	mocks.cryptoSpy.On("HashPassword", mocks.mockRegisterUser.Password).Return("some hash", nil)
+	mocks.userRepositorySpy.On("Create", mocks.mockRegisterUser).Return(mocks.mockUser)
+	mocks.userPermissionsRepositorySpy.On("Create", mocks.mockUser, mocks.mockPermission.ID, mocks.mockPermission.Role).Return(mocks.mockUsersPermissions)
 
-	if result != nil {
-		t.Errorf("SigninUsecase()")
-	}
+	sut := SigninUsecase(mocks.userRepositorySpy, mocks.userPermissionsRepositorySpy, mocks.cryptoSpy)
+
+	err := sut.SigninUsecase(mocks.mockRegisterUser)
+
+	assert.Equal(t, nil, err, "SigninUsecase()")
 }
 
-func TestShouldReturnConflictErrorIfUserEmailAlreadyExist(t *testing.T) {
-	sut := makeSut(
-		&tables.Users{
-			ID: 1,
-		},
-		&tables.UsersPermissions{},
-		"",
-		nil,
-	)
+func TestConflictError(t *testing.T) {
+	mocks := makeMocks()
 
-	result := sut.SigninUsecase(&bussiness.RegisterUsersEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(mocks.mockUser)
+	mocks.cryptoSpy.On("HashPassword", mocks.mockRegisterUser.Password).Return("some hash", nil)
+	mocks.userRepositorySpy.On("Create", mocks.mockRegisterUser).Return(mocks.mockUser)
+	mocks.userPermissionsRepositorySpy.On("Create", mocks.mockUser, mocks.mockPermission.ID, mocks.mockPermission.Role).Return(mocks.mockUsersPermissions)
 
-	if result.Error() != "Something went wrong with the  request. Server returned 409 status." {
-		t.Errorf("SigninUsecase, check if user already exist, Unexpected Response")
-	}
+	sut := SigninUsecase(mocks.userRepositorySpy, mocks.userPermissionsRepositorySpy, mocks.cryptoSpy)
+
+	err := sut.SigninUsecase(mocks.mockRegisterUser)
+
+	assert.Equal(t, "Something went wrong with the  request. Server returned 409 status.", err.Error(), "Should Return Conflict Error If User Email Already Exist")
 }
 
-func TestShouldReturnUnauthorizedErrorIfSomeErrorOccurInCreateHashPassword(t *testing.T) {
-	sut := makeSut(&tables.Users{}, &tables.UsersPermissions{}, "", errors.New("some error"))
+func TestInternalServerError(t *testing.T) {
+	mocks := makeMocks()
 
-	result := sut.SigninUsecase(&bussiness.RegisterUsersEntity{})
+	mocks.userRepositorySpy.On("FindByEmail", mocks.mockUser.Email).Return(&tables.Users{})
+	mocks.cryptoSpy.On("HashPassword", mocks.mockRegisterUser.Password).Return("some hash", errors.New("some error"))
+	mocks.userRepositorySpy.On("Create", mocks.mockRegisterUser).Return(mocks.mockUser)
+	mocks.userPermissionsRepositorySpy.On("Create", mocks.mockUser, mocks.mockPermission.ID, mocks.mockPermission.Role).Return(mocks.mockUsersPermissions)
 
-	if result.Error() != "Something went wrong with the  request. Server returned 401 status." {
-		t.Errorf("SigninUsecase, check if created hash password, Unexpected Response")
-	}
+	sut := SigninUsecase(mocks.userRepositorySpy, mocks.userPermissionsRepositorySpy, mocks.cryptoSpy)
+
+	err := sut.SigninUsecase(mocks.mockRegisterUser)
+
+	assert.Equal(t, "Something went wrong with the  request. Server returned 500 status.", err.Error(), "Should Return Internal Serber Error If Some Error Occur In Create HashPassword")
 }

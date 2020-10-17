@@ -13,11 +13,6 @@ type usecase struct {
 	crypto                     *crypto.IHasher
 }
 
-// ISigninUsecase ...
-type ISigninUsecase interface {
-	SigninUsecase(user *bussiness.RegisterUsersEntity) error
-}
-
 // SigninUsecase ......
 func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 
@@ -30,7 +25,7 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 	hashPassword, err := (*u.crypto).HashPassword(user.Password)
 
 	if err != nil {
-		return &core.UnauthorizedError{}
+		return &core.InternalServerError{}
 	}
 	user.Password = hashPassword
 
@@ -41,6 +36,6 @@ func (u *usecase) SigninUsecase(user *bussiness.RegisterUsersEntity) error {
 }
 
 // SigninUsecase ...
-func SigninUsecase(userRepository *repositories.IUserRepository, usersPermissionsRepository *repositories.IUsersPermissionsRepository, crypto *crypto.IHasher) ISigninUsecase {
-	return &usecase{userRepository, usersPermissionsRepository, crypto}
+func SigninUsecase(userRepository repositories.IUserRepository, usersPermissionsRepository repositories.IUsersPermissionsRepository, crypto crypto.IHasher) ISigninUsecase {
+	return &usecase{&userRepository, &usersPermissionsRepository, &crypto}
 }
